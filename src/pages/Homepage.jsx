@@ -8,6 +8,7 @@ export default function Homepage() {
       <h1>This is home page</h1>
       <button onClick={() => navigate("/signUp")}>Sign up</button>
       <button onClick={() => navigate("/signIn")}>Sign in</button>
+      <button onClick={() => navigate("/products")}>Products</button>
     </div>
   );
 }
