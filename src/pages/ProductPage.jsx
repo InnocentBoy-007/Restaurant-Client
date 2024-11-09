@@ -1,37 +1,189 @@
-// ProductPage.js
-import React from "react";
+import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
+// test passed
 const ProductPage = () => {
-  const handleOrder = () => {
-    alert("Order placed successfully!");
+  const [productInfo, setProductInfo] = useState([]);
+  const [order, setOrder] = useState(false);
+
+  const [productId, setProductId] = useState("");
+  const [orderName, setOrderName] = useState("");
+  const [orderEmail, setOrderEmail] = useState("");
+  const [orderQuantity, setOrderQuantity] = useState(0);
+  const [orderAddress, setOrderAddress] = useState("");
+  const [orderPhoneNo, setOrderPhoneNo] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const fetchProductInfo = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/fetchProduct`
+      );
+
+      if (!response) {
+        console.log("Cannot fetch product details! - frontend");
+      } else {
+        setProductInfo(response.data);
+        console.log("Product details ---->", response.data);
+      }
+    } catch (error) {
+      console.log("Error fetching product details! - frontend", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductInfo();
+  }, []);
+
+  const navigate = useNavigate();
+
+  const placeOrder = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const clientDetails = {
+      clientDetails: {
+        orderName,
+        orderEmail,
+        orderQuantity: parseInt(orderQuantity),
+        orderAddress,
+        orderPhoneNo,
+      },
+    };
+    console.log("Client Details: ", clientDetails);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/placeOrder/${productId}`,
+        clientDetails,
+        { headers: { "Content-Type": "application/json" } }
+      );
+      alert(response.data.message);
+      navigate("/verifyotp");
+    } catch (error) {
+      console.log("Error placing order:", error);
+    }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="max-w-sm rounded overflow-hidden shadow-lg bg-white p-6">
-        <img
-          className="w-full h-48 object-cover"
-          src="https://www.foodandwine.com/thmb/DI29Houjc_ccAtFKly0BbVsusHc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/crispy-comte-cheesburgers-FT-RECIPE0921-6166c6552b7148e8a8561f7765ddf20b.jpg"
-          alt="Product"
-        />
-        <div className="px-6 py-4">
-          <h1 className="text-xl font-semibold mb-2">Product Name</h1>
-          <p className="text-gray-700 text-base">
-            This is a description of the product. It gives the customer some
-            insight into the features and benefits.
-          </p>
-          <p className="text-lg font-bold mt-4">$29.99</p>
-        </div>
-        <div className="px-6 py-4">
-          <button
-            onClick={handleOrder}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+    <>
+      <div className="flex flex-wrap w-[100%] justify-center gap-3">
+        {productInfo.map((item) => (
+          <div
+            key={item._id}
+            className="flex flex-col mt-5 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 text-center items-center p-2 border rounded-lg shadow-lg transition-transform transform hover:scale-105 "
           >
-            Order Now
-          </button>
-        </div>
+            <img
+              src="https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg"
+              alt={item.productName}
+              className="w-4/5 rounded-lg mb-2"
+            />
+            <h1 className="text-xl font-semibold">{item.productName}</h1>
+            <p className="text-gray-700">₹{item.productPrice}</p>
+            <p className="text-sm text-gray-500">
+              Product quantity: {item.productQuantity}
+            </p>
+            <button
+              className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+              onClick={() => {
+                setOrder(true);
+                setProductId(item._id);
+                console.log(productId);
+              }}
+            >
+              Order
+            </button>
+          </div>
+        ))}
       </div>
-    </div>
+      {order && (
+        <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-5">
+          <h2 className="text-2xl font-bold mb-4 text-center">
+            Order Confirmation
+          </h2>
+          <form onSubmit={placeOrder}>
+            <div className="mb-4">
+              <label className="block text-gray-700" htmlFor="orderName">
+                Name
+              </label>
+              <input
+                type="text"
+                name="orderName"
+                id="orderName"
+                value={orderName}
+                onChange={(e) => setOrderName(e.target.value)}
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700" htmlFor="orderEmail">
+                Email
+              </label>
+              <input
+                type="text"
+                name="orderEmail"
+                id="orderEmail"
+                value={orderEmail}
+                onChange={(e) => setOrderEmail(e.target.value)}
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700" htmlFor="phoneNo">
+                Phone
+              </label>
+              <input
+                type="text"
+                name="orderPhoneNo"
+                id="orderPhoneNo"
+                value={orderPhoneNo}
+                onChange={(e) => setOrderPhoneNo(e.target.value)}
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700" htmlFor="quantity">
+                Quantity
+              </label>
+              <input
+                type="number"
+                name="orderQuantity"
+                id="orderQuantity"
+                value={orderQuantity}
+                onChange={(e) => setOrderQuantity(e.target.value)}
+                min="1"
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700" htmlFor="address">
+                Address
+              </label>
+              <input
+                type="text"
+                name="orderAddress"
+                id="orderAddress"
+                value={orderAddress}
+                onChange={(e) => setOrderAddress(e.target.value)}
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </button>
+          </form>
+        </div>
+      )}
+    </>
   );
 };
 

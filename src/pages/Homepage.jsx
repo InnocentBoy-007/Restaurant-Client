@@ -5,10 +5,10 @@ export default function Homepage() {
   const navigate = useNavigate();
   return (
     <div>
-      <h1>This is home page</h1>
-      <button onClick={() => navigate("/signUp")}>Sign up</button>
-      <button onClick={() => navigate("/signIn")}>Sign in</button>
-      <button onClick={() => navigate("/products")}>Products</button>
+      <h1>Welcome to my Restuarant</h1>
+      <button onClick={() => navigate("/products")} className="text-blue-600">
+        Products
+      </button>
     </div>
   );
 }
