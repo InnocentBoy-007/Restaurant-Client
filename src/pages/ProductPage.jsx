@@ -10,7 +10,7 @@ const ProductPage = () => {
   const [productId, setProductId] = useState("");
   const [orderName, setOrderName] = useState("");
   const [orderEmail, setOrderEmail] = useState("");
-  const [orderQuantity, setOrderQuantity] = useState(0);
+  const [orderQuantity, setOrderQuantity] = useState("");
   const [orderAddress, setOrderAddress] = useState("");
   const [orderPhoneNo, setOrderPhoneNo] = useState("");
 
@@ -51,7 +51,6 @@ const ProductPage = () => {
         orderPhoneNo,
       },
     };
-    console.log("Client Details: ", clientDetails);
 
     try {
       const response = await axios.post(
@@ -78,6 +77,7 @@ const ProductPage = () => {
               src="https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg"
               alt={item.productName}
               className="w-4/5 rounded-lg mb-2"
+              loading="lazy"
             />
             <h1 className="text-xl font-semibold">{item.productName}</h1>
             <p className="text-gray-700">₹{item.productPrice}</p>
@@ -89,7 +89,6 @@ const ProductPage = () => {
               onClick={() => {
                 setOrder(true);
                 setProductId(item._id);
-                console.log(productId);
               }}
             >
               Order
@@ -150,7 +149,7 @@ const ProductPage = () => {
                 Quantity
               </label>
               <input
-                type="number"
+                type="text"
                 name="orderQuantity"
                 id="orderQuantity"
                 value={orderQuantity}
