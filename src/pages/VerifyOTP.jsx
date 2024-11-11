@@ -6,28 +6,27 @@ export const VerifyOTP = () => {
   const [OTP, setOTP] = useState("");
   const [loading, setLoading] = useState(false);
 
-    const otp = {
-        otp:{
-            OTP:OTP
-        }
-    }
+  const otp = {
+    otp: {
+      OTP: OTP,
+    },
+  };
 
   const confirmOTP = async (e) => {
     e.preventDefault();
     console.log("OTP-->", otp);
-
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/otpverify`,
+        `${import.meta.env.VITE_BACKEND_API1}/otpverify`,
         otp,
         { headers: { "Content-Type": "application/json" } }
       );
-
       console.log(response.data.message);
-      setLoading(false);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -44,7 +43,7 @@ export const VerifyOTP = () => {
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
           onClick={confirmOTP}
         >
-          {loading ? 'confirming...': 'confirm OTP'}
+          {loading ? "confirming..." : "confirm OTP"}
         </button>
       </div>
     </div>

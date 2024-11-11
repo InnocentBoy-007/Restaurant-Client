@@ -19,7 +19,7 @@ const ProductPage = () => {
   const fetchProductInfo = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/fetchProduct`
+        `${import.meta.env.VITE_BACKEND_API1}/fetchProduct`
       );
 
       if (!response) {
@@ -54,7 +54,7 @@ const ProductPage = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/placeOrder/${productId}`,
+        `${import.meta.env.VITE_BACKEND_API1}/placeOrder/${productId}`,
         clientDetails,
         { headers: { "Content-Type": "application/json" } }
       );
