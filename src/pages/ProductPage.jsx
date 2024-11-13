@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+// database field update by comparing the past orderdetails with the current order details
+
 // test passed
 const ProductPage = () => {
   const [productInfo, setProductInfo] = useState([]);
@@ -15,6 +17,7 @@ const ProductPage = () => {
   const [orderPhoneNo, setOrderPhoneNo] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
 
   const fetchProductInfo = async () => {
     try {
@@ -38,6 +41,24 @@ const ProductPage = () => {
   }, []);
 
   const navigate = useNavigate();
+  const addToCart = async (e, productId) => {
+    e.preventDefault();
+    setAddToCartLoading(true);
+    try {
+      const response = await axios.patch(
+        `${import.meta.env.VITE_BACKEND_API1}/addToCart/${productId}`,
+        {},
+        { headers: { "Content-Type": "application/json" } }
+      );
+      setAddToCartLoading(false);
+      alert(response.data.message);
+    } catch (error) {
+        setAddToCartLoading(false);
+      console.log(error);
+    }finally{
+        setAddToCartLoading(false);
+    }
+  };
 
   const placeOrder = async (e) => {
     e.preventDefault();
@@ -84,15 +105,25 @@ const ProductPage = () => {
             <p className="text-sm text-gray-500">
               Product quantity: {item.productQuantity}
             </p>
-            <button
-              className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-              onClick={() => {
-                setOrder(true);
-                setProductId(item._id);
-              }}
-            >
-              Order
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                onClick={() => {
+                  setOrder(true);
+                  setProductId(item._id);
+                }}
+              >
+                Order
+              </button>
+              <button
+                className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                onClick={(e) => {
+                  addToCart(e, item._id);
+                }}
+              >
+                {addToCartLoading ? 'adding to cart...':'add to cart'}
+              </button>
+            </div>
           </div>
         ))}
       </div>

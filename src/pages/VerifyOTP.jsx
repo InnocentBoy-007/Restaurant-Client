@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 // test passed
 export const VerifyOTP = () => {
+    const navigate = useNavigate();
   const [OTP, setOTP] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -22,11 +24,12 @@ export const VerifyOTP = () => {
         otp,
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log(response.data.message);
+      alert(response.data.message);
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
+      navigate('/products')
     }
   };
   return (
