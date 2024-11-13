@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 // test passed
 export const VerifyOTP = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [OTP, setOTP] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +24,8 @@ export const VerifyOTP = () => {
         otp,
         { headers: { "Content-Type": "application/json" } }
       );
-      alert(response.data.message);
+      navigate("/products");
+      console.log(response.data.message);
     } catch (error) {
       console.log(error);
     } finally {
