@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 const ProductPage = () => {
   const [productInfo, setProductInfo] = useState([]);
   const [order, setOrder] = useState(false);
+  const [addToCartFlag, setAddToCartFlag] = useState(false);
 
   const [productId, setProductId] = useState("");
   const [orderName, setOrderName] = useState("");
@@ -41,22 +42,26 @@ const ProductPage = () => {
   }, []);
 
   const navigate = useNavigate();
-  const addToCart = async (e, productId) => {
+
+  const addToCart = async (e) => {
     e.preventDefault();
     setAddToCartLoading(true);
     try {
-      const response = await axios.patch(
-        `${import.meta.env.VITE_BACKEND_API1}/addToCart/${productId}`,
-        {},
+      const response = await axios.post(
+        `${
+          import.meta.env.VITE_BACKEND_API1
+        }/addToCartVerification/${productId}`,
+        { clientEmail: orderEmail },
         { headers: { "Content-Type": "application/json" } }
       );
       setAddToCartLoading(false);
       alert(response.data.message);
+      navigate("/verifyaddtocartotp");
     } catch (error) {
-        setAddToCartLoading(false);
+      setAddToCartLoading(false);
       console.log(error);
-    }finally{
-        setAddToCartLoading(false);
+    } finally {
+      setAddToCartLoading(false);
     }
   };
 
@@ -81,13 +86,24 @@ const ProductPage = () => {
       );
       alert(response.data.message);
       navigate("/verifyotp");
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.log("Error placing order:", error);
     }
   };
 
   return (
     <>
+      <div className="p-5">
+        <button
+          className="border border-red-700 p-2"
+          onClick={() => navigate("/cart")}
+        >
+          Your cart
+        </button>
+      </div>
+
       <div className="flex flex-wrap w-[100%] justify-center gap-3">
         {productInfo.map((item) => (
           <div
@@ -117,11 +133,12 @@ const ProductPage = () => {
               </button>
               <button
                 className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                onClick={(e) => {
-                  addToCart(e, item._id);
+                onClick={() => {
+                  setAddToCartFlag(true);
+                  setProductId(item._id);
                 }}
               >
-                {addToCartLoading ? 'adding to cart...':'add to cart'}
+                add to cart
               </button>
             </div>
           </div>
@@ -129,9 +146,18 @@ const ProductPage = () => {
       </div>
       {order && (
         <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-5">
-          <h2 className="text-2xl font-bold mb-4 text-center">
-            Order Confirmation
-          </h2>
+          <div className="flex justify-center gap-2">
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Order Confirmation
+            </h2>
+            <button
+              className="border border-red-400"
+              onClick={() => setOrder(false)}
+            >
+              Close
+            </button>
+          </div>
+
           <form onSubmit={placeOrder}>
             <div className="mb-4">
               <label className="block text-gray-700" htmlFor="orderName">
@@ -213,6 +239,33 @@ const ProductPage = () => {
           </form>
         </div>
       )}
+      <div>
+        {addToCartFlag && (
+          <div>
+            <form onSubmit={addToCart}>
+              <div className="mt-4 ml-2 flex justify-center gap-4">
+                <input
+                  value={orderEmail}
+                  onChange={(e) => setOrderEmail(e.target.value)}
+                  placeholder="Enter your email here..."
+                  style={{
+                    border: "2px solid red",
+                  }}
+                />
+                <button type="submit" className="border border-red-500">
+                  {addToCartLoading ? "verifying email..." : "verify email"}
+                </button>
+                <button
+                  className="border border-red-500"
+                  onClick={() => setAddToCartFlag(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
     </>
   );
 };
