@@ -15,7 +15,6 @@ export const VerifyAddToCartOTP = () => {
 
   const confirmOTP = async (e) => {
     e.preventDefault();
-    console.log("OTP-->", otp);
     setLoading(true);
     try {
       const response = await axios.patch(

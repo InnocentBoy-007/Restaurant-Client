@@ -58,6 +58,7 @@ const ProductPage = () => {
       alert(response.data.message);
       navigate("/verifyaddtocartotp");
     } catch (error) {
+      if (error.response) alert(error.response.data.message);
       setAddToCartLoading(false);
       console.log(error);
     } finally {

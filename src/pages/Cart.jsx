@@ -40,6 +40,18 @@ export default function Cart() {
   useEffect(() => {
     fetchProductsFromCart();
   }, []);
+
+  const orderFromCart = async (e, productId) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API1}/placeOrder/${productId}`
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <h1 style={{ fontSize: "2rem" }}>Your cart</h1>
@@ -61,6 +73,14 @@ export default function Cart() {
                   <li>Product: {item.productName}</li>
                   <li>Price: {item.productPrice}</li>
                   <li>Added on: {item.addedTime}</li>
+                  <li>
+                    <button
+                      style={{ border: "2px solid red" }}
+                      onClick={(e) => orderFromCart(e, item.productId)}
+                    >
+                      Order
+                    </button>
+                  </li>
                 </div>
               </ul>
             ))

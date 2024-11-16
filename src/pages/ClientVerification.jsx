@@ -1,36 +1,33 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 // test passed
-export const VerifyOTP = () => {
+export const ClientVerification = () => {
   const navigate = useNavigate();
   const [OTP, setOTP] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const otp = {
-    otp: {
-      OTP: OTP,
-    },
-  };
-
   const confirmOTP = async (e) => {
     e.preventDefault();
-    console.log("OTP-->", otp);
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/otpverify`,
-        otp,
+        `${import.meta.env.VITE_BACKEND_API1}/clientSignUpVerification`,
+        { otp: OTP },
         { headers: { "Content-Type": "application/json" } }
       );
-      navigate("/products");
+      setLoading(false);
+      setOTP("");
+      Cookies.set("clientToken", response.data.token);
+      navigate("/"); // navigate to index page after the verification is completed
       console.log(response.data.message);
     } catch (error) {
       console.log(error);
-    } finally {
+      setOTP(""); // remove the old value
+      navigate("/signUp");
       setLoading(false);
-      navigate('/products')
     }
   };
   return (
