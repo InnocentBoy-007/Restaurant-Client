@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 // database field update by comparing the past orderdetails with the current order details
 
@@ -8,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 const ProductPage = () => {
   const [productInfo, setProductInfo] = useState([]);
   const [order, setOrder] = useState(false);
-  const [addToCartFlag, setAddToCartFlag] = useState(false);
 
   const [productId, setProductId] = useState("");
   const [orderName, setOrderName] = useState("");
@@ -20,6 +21,11 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(false);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
 
+  const token = Cookies.get("clientToken");
+  const decodedToken = jwtDecode(token);
+  const clientEmail = decodedToken.clientDetails.email;
+  console.log("ClientEmail --->", clientEmail);
+
   const fetchProductInfo = async () => {
     try {
       const response = await axios.get(
@@ -28,10 +34,9 @@ const ProductPage = () => {
 
       if (!response) {
         console.log("Cannot fetch product details! - frontend");
-      } else {
-        setProductInfo(response.data);
-        console.log("Product details ---->", response.data);
       }
+      setProductInfo(response.data);
+      console.log("Product details ---->", response.data);
     } catch (error) {
       console.log("Error fetching product details! - frontend", error);
     }
@@ -43,26 +48,24 @@ const ProductPage = () => {
 
   const navigate = useNavigate();
 
-  const addToCart = async (e) => {
+  // need testing
+  const addToCart = async (e, productId) => {
     e.preventDefault();
     setAddToCartLoading(true);
     try {
-      const response = await axios.post(
+      const response = await axios.patch(
         `${
           import.meta.env.VITE_BACKEND_API1
-        }/addToCartVerification/${productId}`,
-        { clientEmail: orderEmail },
+        }/addToCart/${clientEmail}/${productId}`,
+        {}, //empty body
         { headers: { "Content-Type": "application/json" } }
       );
       setAddToCartLoading(false);
       alert(response.data.message);
-      navigate("/verifyaddtocartotp");
     } catch (error) {
       if (error.response) alert(error.response.data.message);
       setAddToCartLoading(false);
       console.log(error);
-    } finally {
-      setAddToCartLoading(false);
     }
   };
 
@@ -86,7 +89,6 @@ const ProductPage = () => {
         { headers: { "Content-Type": "application/json" } }
       );
       alert(response.data.message);
-      navigate("/verifyotp");
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -134,9 +136,8 @@ const ProductPage = () => {
               </button>
               <button
                 className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                onClick={() => {
-                  setAddToCartFlag(true);
-                  setProductId(item._id);
+                onClick={(e) => {
+                  addToCart(e, item._id);
                 }}
               >
                 add to cart
@@ -240,33 +241,6 @@ const ProductPage = () => {
           </form>
         </div>
       )}
-      <div>
-        {addToCartFlag && (
-          <div>
-            <form onSubmit={addToCart}>
-              <div className="mt-4 ml-2 flex justify-center gap-4">
-                <input
-                  value={orderEmail}
-                  onChange={(e) => setOrderEmail(e.target.value)}
-                  placeholder="Enter your email here..."
-                  style={{
-                    border: "2px solid red",
-                  }}
-                />
-                <button type="submit" className="border border-red-500">
-                  {addToCartLoading ? "verifying email..." : "verify email"}
-                </button>
-                <button
-                  className="border border-red-500"
-                  onClick={() => setAddToCartFlag(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-      </div>
     </>
   );
 };

@@ -2,24 +2,26 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 export default function Homepage() {
   const navigate = useNavigate();
   const [clientName, setClientName] = useState("");
+  const token = Cookies.get("clientToken");
+  console.log("Client Token--->", token);
+  const [loading, setLoading] = useState(false);
 
   const decodeCookies = () => {
-    const token = Cookies.get("clientToken");
-    console.log("Token", token);
-
     if (!token) {
       console.log("No token! - backend");
       return;
     }
     try {
       const decodedToken = jwtDecode(token);
+
       const clientToken = decodedToken.clientDetails;
 
-      console.log("Client name--->", clientToken.name); // it's working
+      console.log("Client name--->", clientToken); // it's working
 
       if (clientToken) {
         setClientName(clientToken); // Ensure setClientToken is defined
@@ -31,15 +33,49 @@ export default function Homepage() {
     }
   };
 
+  const logOut = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API1}/clientLogOut`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+      setLoading(false);
+      alert(response.data.message);
+
+      // Clear the token from cookies
+      Cookies.remove("clientToken");
+
+      // Reset clientName state
+      setClientName("");
+
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     decodeCookies();
-  }, []);
+  }, [token]);
 
   return (
     <div className="w-full text-center">
       {clientName ? (
         <>
-          <h1>Welcome to Innocent Restuarant, {clientName.name}</h1>
+          <h1>Welcome to Innocent Restuarant, {clientName}</h1>
+          <button style={{ border: "2px solid red" }} onClick={logOut}>
+            {loading ? "logging out..." : "log out"}
+          </button>
         </>
       ) : (
         <>
