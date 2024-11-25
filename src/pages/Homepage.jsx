@@ -8,7 +8,6 @@ export default function Homepage() {
   const navigate = useNavigate();
   const [clientName, setClientName] = useState("");
   const token = Cookies.get("clientToken");
-  console.log("Client Token--->", token);
   const [loading, setLoading] = useState(false);
 
   const decodeCookies = () => {
@@ -24,7 +23,7 @@ export default function Homepage() {
       console.log("Client name--->", clientToken); // it's working
 
       if (clientToken) {
-        setClientName(clientToken); // Ensure setClientToken is defined
+        setClientName(clientToken.name); // Ensure setClientToken is defined
       } else {
         console.error("clientDetails not found in decoded token");
       }

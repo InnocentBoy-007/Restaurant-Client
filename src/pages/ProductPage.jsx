@@ -8,8 +8,8 @@ import { jwtDecode } from "jwt-decode";
 
 // test passed
 const ProductPage = () => {
+  const token = Cookies.get("clientToken");
   const [productInfo, setProductInfo] = useState([]);
-  const [order, setOrder] = useState(false);
 
   const [productId, setProductId] = useState("");
   const [orderName, setOrderName] = useState("");
@@ -18,13 +18,34 @@ const ProductPage = () => {
   const [orderAddress, setOrderAddress] = useState("");
   const [orderPhoneNo, setOrderPhoneNo] = useState("");
 
+  const [orderConfirmation, setOrderConfirmation] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
 
-  const token = Cookies.get("clientToken");
-  const decodedToken = jwtDecode(token);
-  const clientEmail = decodedToken.clientDetails.email;
-  console.log("ClientEmail --->", clientEmail);
+  const decodedToken = () => {
+    if (!token) {
+      console.log("No token!");
+      return;
+    }
+    // console.log("Token --->", token); // it's working
+    try {
+      const decodedToken = jwtDecode(token);
+      setOrderName(decodedToken.clientDetails.name);
+      setOrderEmail(decodedToken.clientDetails.email);
+      setOrderAddress(decodedToken.clientDetails.address);
+      setOrderPhoneNo(decodedToken.clientDetails.phoneNo);
+      console.log(
+        "Client details--->",
+        orderName,
+        orderEmail,
+        orderAddress,
+        orderPhoneNo
+      ); // it's working
+    } catch (error) {
+      console.log("Error-->", error);
+    }
+  };
 
   const fetchProductInfo = async () => {
     try {
@@ -44,6 +65,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     fetchProductInfo();
+    decodedToken();
   }, []);
 
   const navigate = useNavigate();
@@ -51,6 +73,7 @@ const ProductPage = () => {
   // need testing
   const addToCart = async (e, productId) => {
     e.preventDefault();
+    const clientEmail = orderEmail;
     setAddToCartLoading(true);
     try {
       const response = await axios.patch(
@@ -69,7 +92,7 @@ const ProductPage = () => {
     }
   };
 
-  const placeOrder = async (e) => {
+  const placeOrder = async (e, orderQuantity) => {
     e.preventDefault();
     setLoading(true);
     const clientDetails = {
@@ -89,10 +112,13 @@ const ProductPage = () => {
         { headers: { "Content-Type": "application/json" } }
       );
       alert(response.data.message);
+      setOrderConfirmation(false);
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      setOrderQuantity("");
       console.log("Error placing order:", error);
+      if (error.response) alert(error.response.data.message);
     }
   };
 
@@ -128,8 +154,8 @@ const ProductPage = () => {
               <button
                 className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
                 onClick={() => {
-                  setOrder(true);
                   setProductId(item._id);
+                  setOrderConfirmation(true);
                 }}
               >
                 Order
@@ -146,99 +172,27 @@ const ProductPage = () => {
           </div>
         ))}
       </div>
-      {order && (
-        <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-5">
-          <div className="flex justify-center gap-2">
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              Order Confirmation
-            </h2>
-            <button
-              className="border border-red-400"
-              onClick={() => setOrder(false)}
-            >
-              Close
-            </button>
-          </div>
 
-          <form onSubmit={placeOrder}>
-            <div className="mb-4">
-              <label className="block text-gray-700" htmlFor="orderName">
-                Name
-              </label>
-              <input
-                type="text"
-                name="orderName"
-                id="orderName"
-                value={orderName}
-                onChange={(e) => setOrderName(e.target.value)}
-                required
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700" htmlFor="orderEmail">
-                Email
-              </label>
-              <input
-                type="text"
-                name="orderEmail"
-                id="orderEmail"
-                value={orderEmail}
-                onChange={(e) => setOrderEmail(e.target.value)}
-                required
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700" htmlFor="phoneNo">
-                Phone
-              </label>
-              <input
-                type="text"
-                name="orderPhoneNo"
-                id="orderPhoneNo"
-                value={orderPhoneNo}
-                onChange={(e) => setOrderPhoneNo(e.target.value)}
-                required
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700" htmlFor="quantity">
-                Quantity
-              </label>
-              <input
-                type="text"
-                name="orderQuantity"
-                id="orderQuantity"
-                value={orderQuantity}
-                onChange={(e) => setOrderQuantity(e.target.value)}
-                min="1"
-                required
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700" htmlFor="address">
-                Address
-              </label>
-              <input
-                type="text"
-                name="orderAddress"
-                id="orderAddress"
-                value={orderAddress}
-                onChange={(e) => setOrderAddress(e.target.value)}
-                required
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-          </form>
+      {orderConfirmation && (
+        <div className="w-full flex justify-center mt-20 gap-2 ">
+          <input
+            placeholder="Please enter the quantity of the product you want to purchase"
+            className="border border-red-800"
+            onChange={(e) => setOrderQuantity(e.target.value)}
+            value={orderQuantity}
+          ></input>
+          <button
+            className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+            onClick={(e) => placeOrder(e, orderQuantity)}
+          >
+            Order
+          </button>
+          <button
+            className="border mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+            onClick={() => setOrderConfirmation(false)}
+          >
+            Close
+          </button>
         </div>
       )}
     </>

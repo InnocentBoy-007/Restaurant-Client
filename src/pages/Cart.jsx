@@ -7,6 +7,7 @@ import { jwtDecode } from "jwt-decode";
 export default function Cart() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [removeLoading, setRemoveLoading] = useState(false);
   const [cartProducts, setCartProducts] = useState([]);
 
   const token = Cookies.get("clientToken");
@@ -52,6 +53,27 @@ export default function Cart() {
     }
   };
 
+  const removeFromCart = async (e, productId) => {
+    e.preventDefault();
+    setRemoveLoading(true);
+    console.log("ProductId -->", productId);
+    console.log("Token-->", token);
+
+    try {
+      const response = await axios.delete(
+        `${import.meta.env.VITE_BACKEND_API1}/removeFromCart/${productId}`,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+      alert(response.data.message);
+      setRemoveLoading(false);
+      fetchProductsFromCart(); // refreshing the page
+    } catch (error) {
+      console.log(error);
+      setRemoveLoading(false);
+      if (error.response) alert(error.response.data.message);
+    }
+  };
+
   return (
     <>
       <div
@@ -82,6 +104,12 @@ export default function Cart() {
                       <b>{item.productName}</b>
                     </h2>
                     <p>Price: ${item.productPrice}</p>
+                    <button
+                      className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                      onClick={(e) => removeFromCart(e, item.productId)}
+                    >
+                      {removeLoading ? "removing..." : "remove"}
+                    </button>
                   </div>
                 ))}
               </>
