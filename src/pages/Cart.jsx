@@ -7,15 +7,39 @@ import { jwtDecode } from "jwt-decode";
 export default function Cart() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [placeOrderLoading, setPlaceOrderLoading] = useState(false);
   const [removeLoading, setRemoveLoading] = useState(false);
   const [cartProducts, setCartProducts] = useState([]);
-
   const token = Cookies.get("clientToken");
   const decodedClientToken = jwtDecode(token);
+  const [productId, setProductId] = useState("");
+  const [productName, setOrderProductName] = useState("");
+  const [orderQuantity, setOrderQuantity] = useState("");
+  const [orderFlag, setOrderFlag] = useState(false);
+
+  const clientDetails = {
+    clientDetails: {
+      orderName: decodedClientToken.clientDetails.name,
+      orderProductName: productName,
+      orderEmail: decodedClientToken.clientDetails.email,
+      orderQuantity: parseInt(orderQuantity),
+      orderAddress: decodedClientToken.clientDetails.address,
+      orderPhoneNo: decodedClientToken.clientDetails.phoneNo,
+    },
+  };
+
+  const check = function () {
+    console.log(
+      "Full clientDetails along with orderDetails----->",
+      clientDetails
+    );
+  };
+
   const email = decodedClientToken.clientDetails.email;
 
   const fetchProductsFromCart = async () => {
     console.log("ClientEmail from cart-->", email);
+    console.log("client details---->", clientDetails);
 
     setLoading(true);
     try {
@@ -42,17 +66,6 @@ export default function Cart() {
     fetchProductsFromCart();
   }, []);
 
-  const orderFromCart = async (e, productId) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/placeOrder/${productId}`
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const removeFromCart = async (e, productId) => {
     e.preventDefault();
     setRemoveLoading(true);
@@ -70,6 +83,30 @@ export default function Cart() {
     } catch (error) {
       console.log(error);
       setRemoveLoading(false);
+      if (error.response) alert(error.response.data.message);
+    }
+  };
+
+  // function for placing order from the cart
+  const placeOrder = async (e) => {
+    e.preventDefault();
+    setPlaceOrderLoading(true);
+    console.log("Ordering clientDetails--->", clientDetails);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API1}/placeOrder/${productId}`,
+        clientDetails, // while sending clientDetails, it shouldn't be enclosed with {} since 'clientDetails' is already an object. If not enclose with {} to make it an object
+        { headers: { "Content-Type": "application/json" } }
+      );
+      setOrderQuantity("");
+      setPlaceOrderLoading(false);
+      setOrderFlag(false);
+      console.log(response.data.message);
+      alert(response.data.message);
+    } catch (error) {
+      console.log(error);
+      setOrderQuantity("");
+      setPlaceOrderLoading(false);
       if (error.response) alert(error.response.data.message);
     }
   };
@@ -98,7 +135,7 @@ export default function Cart() {
                   <div key={item._id} className="mt-5 ml-5">
                     <img
                       src="https://images.squarespace-cdn.com/content/v1/5ec1febb58a4890157c8fbeb/19ebb9ed-4862-46e1-9f7c-4e5876730227/Beetroot-Burger.jpg"
-                      width="50%"
+                      width="20%"
                     ></img>
                     <h2>
                       <b>{item.productName}</b>
@@ -110,6 +147,16 @@ export default function Cart() {
                     >
                       {removeLoading ? "removing..." : "remove"}
                     </button>
+                    <button
+                      className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
+                      onClick={() => {
+                        setOrderFlag(true);
+                        setProductId(item.productId);
+                        setOrderProductName(item.productName);
+                      }}
+                    >
+                      Order
+                    </button>
                   </div>
                 ))}
               </>
@@ -117,6 +164,31 @@ export default function Cart() {
           </>
         )}
       </div>
+      {orderFlag && (
+        <>
+          <div className="mt-2 p-2">
+            <input
+              type="text"
+              value={orderQuantity}
+              onChange={(e) => setOrderQuantity(e.target.value)}
+              placeholder="Enter the productQuantity..."
+              className="border border-red-600"
+            ></input>
+            <button
+              className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
+              onClick={placeOrder}
+            >
+              {placeOrderLoading ? "ordering..." : "order"}
+            </button>
+            <button
+              className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
+              onClick={check}
+            >
+              Check
+            </button>
+          </div>
+        </>
+      )}
     </>
   );
 }
