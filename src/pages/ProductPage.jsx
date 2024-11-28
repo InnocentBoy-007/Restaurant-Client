@@ -20,12 +20,9 @@ const ProductPage = () => {
 
   const [orderConfirmation, setOrderConfirmation] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [addToCartLoading, setAddToCartLoading] = useState(false);
-
   const decodedToken = () => {
     if (!token) {
-      console.log("No token!");
+      //   console.log("No token!");
       return;
     }
     // console.log("Token --->", token); // it's working
@@ -35,13 +32,13 @@ const ProductPage = () => {
       setOrderEmail(decodedToken.clientDetails.email);
       setOrderAddress(decodedToken.clientDetails.address);
       setOrderPhoneNo(decodedToken.clientDetails.phoneNo);
-      console.log(
-        "Client details--->",
-        orderName,
-        orderEmail,
-        orderAddress,
-        orderPhoneNo
-      ); // it's working
+      // console.log(
+      //     "Client details--->",
+      //     orderName,
+      //     orderEmail,
+      //     orderAddress,
+      //     orderPhoneNo
+      //   ); // it's working
     } catch (error) {
       console.log("Error-->", error);
     }
@@ -57,7 +54,7 @@ const ProductPage = () => {
         console.log("Cannot fetch product details! - frontend");
       }
       setProductInfo(response.data);
-      console.log("Product details ---->", response.data);
+      // console.log("Product details ---->", response.data);
     } catch (error) {
       console.log("Error fetching product details! - frontend", error);
     }
@@ -74,21 +71,19 @@ const ProductPage = () => {
   const addToCart = async (e, productId) => {
     e.preventDefault();
     const clientEmail = orderEmail;
-    setAddToCartLoading(true);
     try {
       const response = await axios.patch(
         `${
           import.meta.env.VITE_BACKEND_API1
-        }/addToCart/${clientEmail}/${productId}`,
+        }/user/cart/add/${clientEmail}/${productId}`,
         {}, //empty body
         { headers: { "Content-Type": "application/json" } }
       );
-      setAddToCartLoading(false);
+
       alert(response.data.message);
     } catch (error) {
       if (error.response) alert(error.response.data.message);
-      setAddToCartLoading(false);
-      console.log(error);
+      // console.log(error);
     }
   };
 
@@ -124,10 +119,23 @@ const ProductPage = () => {
 
   return (
     <>
+      <div
+        className="w-full bg-blue-600 p-2 text-center"
+        onClick={() => navigate("/")}
+      >
+        Back
+      </div>
       <div className="p-5">
         <button
           className="border border-red-700 p-2"
-          onClick={() => navigate("/cart")}
+          onClick={() => {
+            if (!token) {
+              alert("You need to signin first! - warning!");
+              navigate("/signIn");
+              return;
+            }
+            navigate("/cart");
+          }}
         >
           Your cart
         </button>
@@ -155,6 +163,11 @@ const ProductPage = () => {
                 className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
                 onClick={() => {
                   setProductId(item._id);
+                  if (!token) {
+                    alert("Please login to place order");
+                    navigate("/signIn");
+                    return;
+                  }
                   setOrderConfirmation(true);
                 }}
               >

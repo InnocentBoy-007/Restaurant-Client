@@ -8,7 +8,6 @@ export default function Cart() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [placeOrderLoading, setPlaceOrderLoading] = useState(false);
-  const [removeLoading, setRemoveLoading] = useState(false);
   const [cartProducts, setCartProducts] = useState([]);
   const token = Cookies.get("clientToken");
   const decodedClientToken = jwtDecode(token);
@@ -17,29 +16,22 @@ export default function Cart() {
   const [orderQuantity, setOrderQuantity] = useState("");
   const [orderFlag, setOrderFlag] = useState(false);
 
+  const email = decodedClientToken.clientDetails.email;
+
   const clientDetails = {
     clientDetails: {
       orderName: decodedClientToken.clientDetails.name,
       orderProductName: productName,
-      orderEmail: decodedClientToken.clientDetails.email,
+      orderEmail: email,
       orderQuantity: parseInt(orderQuantity),
       orderAddress: decodedClientToken.clientDetails.address,
       orderPhoneNo: decodedClientToken.clientDetails.phoneNo,
     },
   };
 
-  const check = function () {
-    console.log(
-      "Full clientDetails along with orderDetails----->",
-      clientDetails
-    );
-  };
-
-  const email = decodedClientToken.clientDetails.email;
-
   const fetchProductsFromCart = async () => {
-    console.log("ClientEmail from cart-->", email);
-    console.log("client details---->", clientDetails);
+    // console.log("ClientEmail from cart-->", email);
+    // console.log("client details---->", clientDetails);
 
     setLoading(true);
     try {
@@ -53,9 +45,9 @@ export default function Cart() {
         }
       );
       setCartProducts(response.data.checkProduct);
-      console.log("Product details--->", response.data.checkProduct); // it's working
+      // console.log("Product details--->", response.data.checkProduct); // it's working
       setLoading(false);
-      console.log(`Fetching response data by ${email}`);
+      // console.log(`Fetching response data by ${email}`);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -68,21 +60,18 @@ export default function Cart() {
 
   const removeFromCart = async (e, productId) => {
     e.preventDefault();
-    setRemoveLoading(true);
-    console.log("ProductId -->", productId);
-    console.log("Token-->", token);
+    // console.log("ProductId -->", productId);
+    // console.log("Token-->", token);
 
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_API1}/removeFromCart/${productId}`,
+        `${import.meta.env.VITE_BACKEND_API1}/user/cart/remove/${productId}`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       alert(response.data.message);
-      setRemoveLoading(false);
       fetchProductsFromCart(); // refreshing the page
     } catch (error) {
       console.log(error);
-      setRemoveLoading(false);
       if (error.response) alert(error.response.data.message);
     }
   };
@@ -91,7 +80,7 @@ export default function Cart() {
   const placeOrder = async (e) => {
     e.preventDefault();
     setPlaceOrderLoading(true);
-    console.log("Ordering clientDetails--->", clientDetails);
+    // console.log("Ordering clientDetails--->", clientDetails);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API1}/placeOrder/${productId}`,
@@ -103,6 +92,14 @@ export default function Cart() {
       setOrderFlag(false);
       console.log(response.data.message);
       alert(response.data.message);
+
+      // removing the products from the cart after placing the order
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_API1}/user/cart/remove/${productId}`,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+
+      fetchProductsFromCart(); // updating the page
     } catch (error) {
       console.log(error);
       setOrderQuantity("");
@@ -145,7 +142,7 @@ export default function Cart() {
                       className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
                       onClick={(e) => removeFromCart(e, item.productId)}
                     >
-                      {removeLoading ? "removing..." : "remove"}
+                      remove
                     </button>
                     <button
                       className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
@@ -179,12 +176,6 @@ export default function Cart() {
               onClick={placeOrder}
             >
               {placeOrderLoading ? "ordering..." : "order"}
-            </button>
-            <button
-              className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
-              onClick={check}
-            >
-              Check
             </button>
           </div>
         </>

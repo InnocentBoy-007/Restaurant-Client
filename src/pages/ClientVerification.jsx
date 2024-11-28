@@ -14,7 +14,7 @@ export const ClientVerification = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/clientSignUpVerification`,
+        `${import.meta.env.VITE_BACKEND_API1}/user/signup/verify`,
         { otp: OTP },
         { headers: { "Content-Type": "application/json" } }
       );

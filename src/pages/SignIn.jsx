@@ -20,10 +20,10 @@ export default function SignIn() {
   const signIn = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log(clientDetails);
+    // console.log(clientDetails);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/clientSignIn`,
+        `${import.meta.env.VITE_BACKEND_API1}/user/signin`,
         clientDetails,
         {
           headers: { "Content-Type": "application/json" },
@@ -39,6 +39,12 @@ export default function SignIn() {
   };
   return (
     <>
+      <div
+        className="w-full bg-blue-500 p-4 text-center"
+        onClick={() => navigate("/")}
+      >
+        Home
+      </div>
       <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-5">
         <h2 className="text-2xl font-bold mb-4 text-center">SignIn</h2>
 
@@ -78,6 +84,10 @@ export default function SignIn() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+        <div>
+          Don't have an account?{" "}
+          <span onClick={() => navigate("/signUp")}>Sing up</span>
+        </div>
       </div>
     </>
   );

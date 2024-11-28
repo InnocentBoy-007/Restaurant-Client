@@ -36,7 +36,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/clientSignUp`,
+        `${import.meta.env.VITE_BACKEND_API1}/user/signup`,
         clientDetails,
         {
           headers: {
@@ -58,6 +58,12 @@ export default function SignUp() {
   };
   return (
     <>
+      <div
+        className="w-full bg-blue-500 p-4 text-center"
+        onClick={() => navigate("/")}
+      >
+        Home
+      </div>
       <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-5">
         <h2 className="text-2xl font-bold mb-4 text-center">SignUp</h2>
 
@@ -139,6 +145,10 @@ export default function SignUp() {
             {loading ? "Submitting..." : "Submit"}
           </button>
         </form>
+        <div>
+          Already have an account.{" "}
+          <span onClick={() => navigate("/signIn")}>Login</span>
+        </div>
       </div>
     </>
   );

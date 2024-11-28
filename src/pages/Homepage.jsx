@@ -12,7 +12,7 @@ export default function Homepage() {
 
   const decodeCookies = () => {
     if (!token) {
-      console.log("No token! - backend");
+      //   console.log("No token! - frontend");
       return;
     }
     try {
@@ -20,7 +20,7 @@ export default function Homepage() {
 
       const clientToken = decodedToken.clientDetails;
 
-      console.log("Client name--->", clientToken); // it's working
+      // console.log("Client name--->", clientToken); // it's working
 
       if (clientToken) {
         setClientName(clientToken.name); // Ensure setClientToken is defined
@@ -36,9 +36,8 @@ export default function Homepage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/clientLogOut`,
-        {},
+      const response = await axios.delete(
+        `${import.meta.env.VITE_BACKEND_API1}/user/logout`,
         {
           headers: {
             "Content-Type": "application/json",
