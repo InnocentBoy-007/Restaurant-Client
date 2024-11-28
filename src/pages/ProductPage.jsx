@@ -129,7 +129,7 @@ const ProductPage = () => {
       </div>
       <div className="p-5">
         <button
-          className="border border-red-700 p-2"
+          className="border border-red-700 p-2 bg-blue-300"
           onClick={() => {
             if (!token) {
               alert("You need to signin first! - warning!");
@@ -140,6 +140,19 @@ const ProductPage = () => {
           }}
         >
           Your cart
+        </button>
+        <button
+          className="border border-red-500 p-2 ml-2 bg-gray-300"
+          onClick={() => {
+            if (!token) {
+              alert("You haven't login yet! - warning");
+              navigate("/signIn");
+              return;
+            }
+            navigate("/orders");
+          }}
+        >
+          Your orders
         </button>
       </div>
 

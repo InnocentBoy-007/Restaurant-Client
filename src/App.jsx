@@ -5,6 +5,7 @@ import SignIn from "./pages/signIn";
 import SignUp from "./pages/signUp";
 import ProductPage from "./pages/ProductPage";
 import Cart from "./pages/Cart";
+import Orders from "./pages/Orders";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/products" element={<ProductPage />} />
           <Route path="/clientVerification" element={<ClientVerification />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/Orders" element={<Orders />} />
         </Routes>
       </BrowserRouter>
     </>
