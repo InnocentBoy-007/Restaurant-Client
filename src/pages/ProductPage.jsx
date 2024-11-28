@@ -102,7 +102,9 @@ const ProductPage = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/placeOrder/${productId}`,
+        `${
+          import.meta.env.VITE_BACKEND_API1
+        }/user/products/placeorder/${productId}`,
         clientDetails,
         { headers: { "Content-Type": "application/json" } }
       );

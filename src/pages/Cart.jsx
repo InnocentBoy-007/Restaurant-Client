@@ -36,7 +36,7 @@ export default function Cart() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/fetchOrdersCart/${email}`,
+        `${import.meta.env.VITE_BACKEND_API1}/user/cart/products/${email}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -83,7 +83,9 @@ export default function Cart() {
     // console.log("Ordering clientDetails--->", clientDetails);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/placeOrder/${productId}`,
+        `${
+          import.meta.env.VITE_BACKEND_API1
+        }/user/products/placeorder/${productId}`,
         clientDetails, // while sending clientDetails, it shouldn't be enclosed with {} since 'clientDetails' is already an object. If not enclose with {} to make it an object
         { headers: { "Content-Type": "application/json" } }
       );
