@@ -30,7 +30,8 @@ export default function SignIn() {
         }
       );
       setLoading(false);
-      Cookies.set("clientToken", response.data.token);
+      Cookies.set("clientToken", response.data.token); // it last for only 15 minutes
+      Cookies.set("clientRefreshToken", response.data.refreshToken);
       navigate("/");
     } catch (error) {
       console.log(error);

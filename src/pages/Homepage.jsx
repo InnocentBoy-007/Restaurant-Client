@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import refreshAccessToken from "./RefreshToken";
 
 export default function Homepage() {
   const navigate = useNavigate();
@@ -51,14 +52,21 @@ export default function Homepage() {
 
       // Clear the token from cookies
       Cookies.remove("clientToken");
+      Cookies.remove("clientRefreshToken");
 
       // Reset clientName state
       setClientName("");
-
       navigate("/");
     } catch (error) {
-      console.log(error);
-      setLoading(false);
+      if (error.response) {
+        const newToken = await refreshAccessToken(navigate);
+        if (newToken) {
+          return logOut(e);
+        }
+      } else {
+        console.log(error);
+        setLoading(false);
+      }
     }
   };
 
