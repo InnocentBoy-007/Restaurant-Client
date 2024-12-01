@@ -87,7 +87,12 @@ export default function SignIn() {
         </form>
         <div>
           Don't have an account?{" "}
-          <span onClick={() => navigate("/signUp")}>Sing up</span>
+          <span
+            onClick={() => navigate("/signUp")}
+            style={{ cursor: "pointer" }}
+          >
+            Sing up
+          </span>
         </div>
       </div>
     </>

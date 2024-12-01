@@ -3,46 +3,24 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import refreshAccessToken from "./RefreshToken";
 
 // database field update by comparing the past orderdetails with the current order details
 
 // test passed
 const ProductPage = () => {
+  const navigate = useNavigate();
+
   const token = Cookies.get("clientToken");
   const [productInfo, setProductInfo] = useState([]);
+  const [clientInfo, setClientInfo] = useState({}); // as an object
 
   const [productId, setProductId] = useState("");
-  const [orderName, setOrderName] = useState("");
-  const [orderEmail, setOrderEmail] = useState("");
   const [orderQuantity, setOrderQuantity] = useState("");
-  const [orderAddress, setOrderAddress] = useState("");
-  const [orderPhoneNo, setOrderPhoneNo] = useState("");
 
   const [orderConfirmation, setOrderConfirmation] = useState(false);
 
-  const decodedToken = () => {
-    if (!token) {
-      //   console.log("No token!");
-      return;
-    }
-    // console.log("Token --->", token); // it's working
-    try {
-      const decodedToken = jwtDecode(token);
-      setOrderName(decodedToken.clientDetails.name);
-      setOrderEmail(decodedToken.clientDetails.email);
-      setOrderAddress(decodedToken.clientDetails.address);
-      setOrderPhoneNo(decodedToken.clientDetails.phoneNo);
-      // console.log(
-      //     "Client details--->",
-      //     orderName,
-      //     orderEmail,
-      //     orderAddress,
-      //     orderPhoneNo
-      //   ); // it's working
-    } catch (error) {
-      console.log("Error-->", error);
-    }
-  };
+  const [loading, setLoading] = useState(false);
 
   const fetchProductInfo = async () => {
     try {
@@ -54,6 +32,7 @@ const ProductPage = () => {
         console.log("Cannot fetch product details! - frontend");
       }
       setProductInfo(response.data);
+
       // console.log("Product details ---->", response.data);
     } catch (error) {
       console.log("Error fetching product details! - frontend", error);
@@ -62,60 +41,86 @@ const ProductPage = () => {
 
   useEffect(() => {
     fetchProductInfo();
-    decodedToken();
   }, []);
 
-  const navigate = useNavigate();
+  const fetchClientDetals = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+      setClientInfo(response.data.clientDetails);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchClientDetals();
+    }
+  }, []);
 
   // need testing
   const addToCart = async (e, productId) => {
     e.preventDefault();
-    const clientEmail = orderEmail;
     try {
-      const response = await axios.patch(
-        `${
-          import.meta.env.VITE_BACKEND_API1
-        }/user/cart/add/${clientEmail}/${productId}`,
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API1}/user/cart/add/${productId}`,
         {}, //empty body
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
       );
-
       alert(response.data.message);
     } catch (error) {
-      if (error.response) alert(error.response.data.message);
+      console.log(error);
+      if (error.response.data.message == "Invalid token - backend") {
+        const newToken = await refreshAccessToken(navigate);
+        if (newToken) {
+          return addToCart(e, productId);
+        }
+      } else {
+        alert(error.response.data.message);
+      }
       // console.log(error);
     }
   };
 
-  const placeOrder = async (e, orderQuantity) => {
+  const placeOrder = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const clientDetails = {
-      clientDetails: {
-        orderName,
-        orderEmail,
-        orderQuantity: parseInt(orderQuantity),
-        orderAddress,
-        orderPhoneNo,
+    const orderDetails = {
+      orderDetails: {
+        productId,
+        productQuantity: orderQuantity,
       },
     };
 
     try {
       const response = await axios.post(
-        `${
-          import.meta.env.VITE_BACKEND_API1
-        }/user/products/placeorder/${productId}`,
-        clientDetails,
-        { headers: { "Content-Type": "application/json" } }
+        `${import.meta.env.VITE_BACKEND_API1}/user/products/placeorder`,
+        orderDetails,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
       );
       alert(response.data.message);
       setOrderConfirmation(false);
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
-      setOrderQuantity("");
       console.log("Error placing order:", error);
       if (error.response) alert(error.response.data.message);
+    } finally {
+      setLoading(false);
+      setOrderQuantity("");
     }
   };
 
@@ -123,37 +128,58 @@ const ProductPage = () => {
     <>
       <div
         className="w-full bg-blue-600 p-2 text-center"
+        style={{ cursor: "pointer" }}
         onClick={() => navigate("/")}
       >
         Back
       </div>
-      <div className="p-5">
-        <button
-          className="border border-red-700 p-2 bg-blue-300"
-          onClick={() => {
-            if (!token) {
-              alert("You need to signin first! - warning!");
-              navigate("/signIn");
-              return;
-            }
-            navigate("/cart");
-          }}
-        >
-          Your cart
-        </button>
-        <button
-          className="border border-red-500 p-2 ml-2 bg-gray-300"
-          onClick={() => {
-            if (!token) {
-              alert("You haven't login yet! - warning");
-              navigate("/signIn");
-              return;
-            }
-            navigate("/orders");
-          }}
-        >
-          Your orders
-        </button>
+      <div className="p-5 flex justify-between">
+        <div className="flex gap-2">
+          <button
+            className="border border-red-700 p-2 bg-blue-300"
+            onClick={() => {
+              if (!token) {
+                alert("You need to signin first! - warning!");
+                navigate("/signIn");
+                return;
+              }
+              navigate("/cart");
+            }}
+          >
+            Your cart
+          </button>
+          <button
+            className="border border-red-500 p-2 bg-gray-300"
+            onClick={() => {
+              if (!token) {
+                alert("You haven't login yet! - warning");
+                navigate("/signIn");
+                return;
+              }
+              navigate("/orders");
+            }}
+          >
+            Your orders
+          </button>
+        </div>
+        {!token && (
+          <>
+            <div className="flex gap-2">
+              <button
+                className="border border-red-700 p-2 bg-gray-300"
+                onClick={() => navigate("/signin")}
+              >
+                Login
+              </button>
+              <button
+                className="border border-red-700 p-2 bg-blue-300"
+                onClick={() => navigate("/signup")}
+              >
+                Register
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="flex flex-wrap w-[100%] justify-center gap-3">
@@ -179,8 +205,9 @@ const ProductPage = () => {
                 onClick={() => {
                   setProductId(item._id);
                   if (!token) {
-                    alert("Please login to place order");
+                    alert("Please login first to place order");
                     navigate("/signIn");
+                    setProductId("");
                     return;
                   }
                   setOrderConfirmation(true);
@@ -192,6 +219,11 @@ const ProductPage = () => {
                 className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
                 onClick={(e) => {
                   addToCart(e, item._id);
+                  if (!token) {
+                    alert("Please login first to add products in cart");
+                    navigate("/signin");
+                    return;
+                  }
                 }}
               >
                 add to cart
@@ -211,7 +243,7 @@ const ProductPage = () => {
           ></input>
           <button
             className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-            onClick={(e) => placeOrder(e, orderQuantity)}
+            onClick={(e) => placeOrder(e)}
           >
             Order
           </button>

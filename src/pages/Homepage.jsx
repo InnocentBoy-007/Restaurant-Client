@@ -19,12 +19,11 @@ export default function Homepage() {
     try {
       const decodedToken = jwtDecode(token);
 
-      const clientToken = decodedToken.clientDetails;
+      const clientName = decodedToken.name;
 
       // console.log("Client name--->", clientToken); // it's working
-
-      if (clientToken) {
-        setClientName(clientToken.name); // Ensure setClientToken is defined
+      if (clientName) {
+        setClientName(clientName); // Ensure setClientToken is defined
       } else {
         console.error("clientDetails not found in decoded token");
       }
@@ -58,7 +57,7 @@ export default function Homepage() {
       setClientName("");
       navigate("/");
     } catch (error) {
-      if (error.response) {
+      if ((error.response.data.message = "Invalid token - backend")) {
         const newToken = await refreshAccessToken(navigate);
         if (newToken) {
           return logOut(e);
@@ -78,23 +77,33 @@ export default function Homepage() {
     <div className="w-full text-center">
       {clientName ? (
         <>
-          <h1>Welcome to Innocent Restuarant, {clientName}</h1>
+          <h1>Welcome to Coffee Restuarant, {clientName}</h1>
           <button style={{ border: "2px solid red" }} onClick={logOut}>
             {loading ? "logging out..." : "log out"}
           </button>
         </>
       ) : (
         <>
-          <h1>Welcome to Innocent Restaurant</h1>
+          <h1>Welcome to Coffee Restaurant</h1>
           <div className="flex justify-center gap-4 mt-2">
-            <button onClick={() => navigate("/signUp")}>SignUp</button>
-            <button onClick={() => navigate("/signIn")}>SignIn</button>
+            <button
+              onClick={() => navigate("/signUp")}
+              className="border border-red-700 p-2"
+            >
+              SignUp
+            </button>
+            <button
+              onClick={() => navigate("/signIn")}
+              className="border border-red-700 p-2"
+            >
+              SignIn
+            </button>
           </div>
         </>
       )}
       <button
         onClick={() => navigate("/products")}
-        className="text-blue-600 border border-red-800 mt-2"
+        className="text-blue-600 border border-red-800 mt-2 p-2"
       >
         Products
       </button>

@@ -1,6 +1,5 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
 
 // Define the refreshAccessToken function
 export const refreshAccessToken = async (navigate) => {
@@ -25,9 +24,11 @@ export const refreshAccessToken = async (navigate) => {
     console.error("Failed to refresh token:", error);
     // Handle error (e.g., redirect to login if refresh fails)
     // Optionally, clear cookies and navigate to login
-    Cookies.remove("clientToken");
-    Cookies.remove("clientRefreshToken");
-    navigate("/signIn");
+    if (error.response) {
+      Cookies.remove("clientToken");
+      Cookies.remove("clientRefreshToken");
+      navigate("/signIn");
+    }
   }
 };
 

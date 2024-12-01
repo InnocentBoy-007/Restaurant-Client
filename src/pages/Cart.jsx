@@ -2,31 +2,45 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
+import refreshAccessToken from "./RefreshToken";
 
 export default function Cart() {
+  const token = Cookies.get("clientToken");
   const navigate = useNavigate();
+
+  const [clientDetails, setClientDetails] = useState({}); // object
+  const [cartProducts, setCartProducts] = useState([]); // array
+
   const [loading, setLoading] = useState(false);
   const [placeOrderLoading, setPlaceOrderLoading] = useState(false);
-  const [cartProducts, setCartProducts] = useState([]);
-  const token = Cookies.get("clientToken");
-  const decodedClientToken = jwtDecode(token);
+
   const [productId, setProductId] = useState("");
-  const [productName, setOrderProductName] = useState("");
   const [orderQuantity, setOrderQuantity] = useState("");
+
   const [orderFlag, setOrderFlag] = useState(false);
 
-  const email = decodedClientToken.clientDetails.email;
-
-  const clientDetails = {
-    clientDetails: {
-      orderName: decodedClientToken.clientDetails.name,
-      orderProductName: productName,
-      orderEmail: email,
-      orderQuantity: parseInt(orderQuantity),
-      orderAddress: decodedClientToken.clientDetails.address,
-      orderPhoneNo: decodedClientToken.clientDetails.phoneNo,
-    },
+  const fetchClientDetails = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+      setClientDetails(response.data.clientDetails);
+      //   console.log("Client details--->", response.data.clientDetails);
+    } catch (error) {
+      console.log(error);
+      if ((error.response.data.message = "Invalid token - backend")) {
+        const newToken = await refreshAccessToken(navigate);
+        if (newToken) {
+          return fetchClientDetails();
+        } else {
+          alert(response.data.message);
+        }
+      }
+    }
   };
 
   const fetchProductsFromCart = async () => {
@@ -36,7 +50,7 @@ export default function Cart() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/cart/products/${email}`,
+        `${import.meta.env.VITE_BACKEND_API1}/user/cart/products`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -44,20 +58,30 @@ export default function Cart() {
           withCredentials: true,
         }
       );
-      setCartProducts(response.data.checkProduct);
+      setCartProducts(response.data.cartDetails);
       // console.log("Product details--->", response.data.checkProduct); // it's working
-      setLoading(false);
       // console.log(`Fetching response data by ${email}`);
     } catch (error) {
-      console.log(error);
+      if (error.response) {
+        // being sure that the error is caused by token expiration error
+        const newToken = await refreshAccessToken(navigate);
+        if (newToken) {
+          return fetchProductsFromCart();
+        } else {
+          alert("Token expired! - backend");
+        }
+      }
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    fetchClientDetails();
     fetchProductsFromCart();
   }, []);
 
+  // test passed
   const removeFromCart = async (e, productId) => {
     e.preventDefault();
     // console.log("ProductId -->", productId);
@@ -113,7 +137,7 @@ export default function Cart() {
   return (
     <>
       <div
-        className="p-5 border border-red-700 text-center bg-blue-400"
+        className="p-5 border border-red-700 text-center bg-blue-400 cursor-pointer"
         onClick={() => navigate("/products")}
       >
         <h1>Back</h1>
@@ -121,8 +145,8 @@ export default function Cart() {
       <div className="w-full mt-2">
         <h1>Your cart</h1>
         {loading ? (
-          <div>
-            <h1>Loading...</h1>
+          <div className="w-full h-full text-center mt-5">
+            <h1 style={{ fontSize: "4rem" }}>Loading...</h1>
           </div>
         ) : (
           <>
@@ -151,7 +175,6 @@ export default function Cart() {
                       onClick={() => {
                         setOrderFlag(true);
                         setProductId(item.productId);
-                        setOrderProductName(item.productName);
                       }}
                     >
                       Order
