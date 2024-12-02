@@ -21,6 +21,7 @@ export const ClientVerification = () => {
       setLoading(false);
       setOTP("");
       Cookies.set("clientToken", response.data.token); // this contains the name of the client
+      Cookies.set("clientRefreshToken", response.data.token); // this contains the name of the client
       navigate("/"); // navigate to index page after the verification is completed
       console.log(response.data.message);
     } catch (error) {

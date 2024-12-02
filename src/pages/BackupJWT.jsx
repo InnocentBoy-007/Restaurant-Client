@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
 export default function BackupJWT() {
-  const token = Cookies.get("clientToken");
+  const token = Cookies.get("clientRefreshToken");
   const decodedToken = jwtDecode(token);
   const clientId = decodedToken.clientDetails._id;
 

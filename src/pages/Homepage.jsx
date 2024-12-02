@@ -21,7 +21,6 @@ export default function Homepage() {
 
       const clientName = decodedToken.name;
 
-      // console.log("Client name--->", clientToken); // it's working
       if (clientName) {
         setClientName(clientName); // Ensure setClientToken is defined
       } else {

@@ -8,6 +8,7 @@ export default function SignUp() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
   const [address, setAddress] = useState("");
@@ -16,6 +17,7 @@ export default function SignUp() {
     clientDetails: {
       name,
       email,
+      gender,
       password,
       phoneNo,
       address,
@@ -25,6 +27,7 @@ export default function SignUp() {
   const cleanUp = () => {
     setName("");
     setEmail("");
+    setGender("");
     setPassword("");
     setPhoneNo("");
     setAddress("");
@@ -92,6 +95,20 @@ export default function SignUp() {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700" htmlFor="gender">
+              gender
+            </label>
+            <input
+              type="text"
+              name="gender"
+              id="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
               required
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
             />

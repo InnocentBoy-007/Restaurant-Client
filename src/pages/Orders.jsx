@@ -20,7 +20,6 @@ export default function Orders() {
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setTrackedOrders(response.data.orderDetails);
-      console.log(response.data.orderDetails);
     } catch (error) {
       if (error.response) {
         console.log(error.response.data.message);

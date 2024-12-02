@@ -10,6 +10,7 @@ export default function Cart() {
 
   const [clientDetails, setClientDetails] = useState({}); // object
   const [cartProducts, setCartProducts] = useState([]); // array
+  const [noCartProductMessage, setNoCartProductsMessage] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [placeOrderLoading, setPlaceOrderLoading] = useState(false);
@@ -29,9 +30,9 @@ export default function Cart() {
         }
       );
       setClientDetails(response.data.clientDetails);
-      //   console.log("Client details--->", response.data.clientDetails);
     } catch (error) {
       console.log(error);
+      Cookies.remove("clientToken");
       if ((error.response.data.message = "Invalid token - backend")) {
         const newToken = await refreshAccessToken(navigate);
         if (newToken) {
@@ -44,9 +45,6 @@ export default function Cart() {
   };
 
   const fetchProductsFromCart = async () => {
-    // console.log("ClientEmail from cart-->", email);
-    // console.log("client details---->", clientDetails);
-
     setLoading(true);
     try {
       const response = await axios.get(
@@ -58,12 +56,14 @@ export default function Cart() {
           withCredentials: true,
         }
       );
+
       setCartProducts(response.data.cartDetails);
-      // console.log("Product details--->", response.data.checkProduct); // it's working
-      // console.log(`Fetching response data by ${email}`);
+      setNoCartProductsMessage(response.data.message);
     } catch (error) {
-      if (error.response) {
-        // being sure that the error is caused by token expiration error
+      if (
+        error.response.message ==
+        "An unexpected error occured while trying to fetch a refreshed token! - backend"
+      ) {
         const newToken = await refreshAccessToken(navigate);
         if (newToken) {
           return fetchProductsFromCart();
@@ -104,19 +104,28 @@ export default function Cart() {
   const placeOrder = async (e) => {
     e.preventDefault();
     setPlaceOrderLoading(true);
+    const orderDetails = {
+      orderDetails: {
+        productId,
+        productQuantity: orderQuantity,
+      },
+    };
     // console.log("Ordering clientDetails--->", clientDetails);
     try {
       const response = await axios.post(
-        `${
-          import.meta.env.VITE_BACKEND_API1
-        }/user/products/placeorder/${productId}`,
-        clientDetails, // while sending clientDetails, it shouldn't be enclosed with {} since 'clientDetails' is already an object. If not enclose with {} to make it an object
-        { headers: { "Content-Type": "application/json" } }
+        `${import.meta.env.VITE_BACKEND_API1}/user/products/placeorder`,
+        orderDetails,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
       );
       setOrderQuantity("");
       setPlaceOrderLoading(false);
       setOrderFlag(false);
-      console.log(response.data.message);
       alert(response.data.message);
 
       // removing the products from the cart after placing the order
@@ -151,7 +160,7 @@ export default function Cart() {
         ) : (
           <>
             {cartProducts.length === 0 ? (
-              <h1>No items in cart</h1>
+              <h1>{noCartProductMessage}</h1>
             ) : (
               <>
                 {cartProducts.map((item, index) => (
