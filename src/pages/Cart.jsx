@@ -147,7 +147,7 @@ export default function Cart() {
     <>
       <div
         className="p-5 border border-red-700 text-center bg-blue-400 cursor-pointer"
-        onClick={() => navigate("/products")}
+        onClick={() => navigate("/user/products")}
       >
         <h1>Back</h1>
       </div>
@@ -173,6 +173,7 @@ export default function Cart() {
                       <b>{item.productName}</b>
                     </h2>
                     <p>Price: ${item.productPrice}</p>
+                    <p>Product Quantity: {item.productQuantity}</p>
                     <button
                       className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
                       onClick={(e) => removeFromCart(e, item.productId)}

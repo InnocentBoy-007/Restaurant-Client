@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import refreshAccessToken from "./RefreshToken";
 
@@ -11,25 +10,23 @@ export default function Homepage() {
   const token = Cookies.get("clientToken");
   const [loading, setLoading] = useState(false);
 
-  const decodeCookies = () => {
-    if (!token) {
-      //   console.log("No token! - frontend");
-      return;
-    }
+  const fetchClientDetails = async () => {
     try {
-      const decodedToken = jwtDecode(token);
-
-      const clientName = decodedToken.name;
-
-      if (clientName) {
-        setClientName(clientName); // Ensure setClientToken is defined
-      } else {
-        console.error("clientDetails not found in decoded token");
-      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+      setClientName(response.data.clientDetails.name);
     } catch (error) {
-      console.log("Failed to decode token: ", error);
+      console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      fetchClientDetails();
+    }
+  }, []);
 
   const logOut = async (e) => {
     e.preventDefault();
@@ -68,10 +65,6 @@ export default function Homepage() {
     }
   };
 
-  useEffect(() => {
-    decodeCookies();
-  }, [token]);
-
   return (
     <div className="w-full text-center">
       {clientName ? (
@@ -86,13 +79,13 @@ export default function Homepage() {
           <h1>Welcome to Coffee Restaurant</h1>
           <div className="flex justify-center gap-4 mt-2">
             <button
-              onClick={() => navigate("/signUp")}
+              onClick={() => navigate("/user/signUp")}
               className="border border-red-700 p-2"
             >
               SignUp
             </button>
             <button
-              onClick={() => navigate("/signIn")}
+              onClick={() => navigate("/user/signIn")}
               className="border border-red-700 p-2"
             >
               SignIn
@@ -101,7 +94,7 @@ export default function Homepage() {
         </>
       )}
       <button
-        onClick={() => navigate("/products")}
+        onClick={() => navigate("/user/products")}
         className="text-blue-600 border border-red-800 mt-2 p-2"
       >
         Products

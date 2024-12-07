@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 import refreshAccessToken from "./RefreshToken";
 
 // database field update by comparing the past orderdetails with the current order details
@@ -25,7 +24,7 @@ const ProductPage = () => {
   const fetchProductInfo = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/fetchProduct`
+        `${import.meta.env.VITE_BACKEND_API1}/products`
       );
 
       if (!response) {
@@ -38,10 +37,6 @@ const ProductPage = () => {
       console.log("Error fetching product details! - frontend", error);
     }
   };
-
-  useEffect(() => {
-    fetchProductInfo();
-  }, []);
 
   const fetchClientDetals = async () => {
     try {
@@ -57,6 +52,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (token) {
+      fetchProductInfo();
       fetchClientDetals();
     }
   }, []);
@@ -140,10 +136,10 @@ const ProductPage = () => {
             onClick={() => {
               if (!token) {
                 alert("You need to signin first! - warning!");
-                navigate("/signIn");
+                navigate("/user/signIn");
                 return;
               }
-              navigate("/cart");
+              navigate("/user/products/cart");
             }}
           >
             Your cart
@@ -153,10 +149,10 @@ const ProductPage = () => {
             onClick={() => {
               if (!token) {
                 alert("You haven't login yet! - warning");
-                navigate("/signIn");
+                navigate("/user/signIn");
                 return;
               }
-              navigate("/orders");
+              navigate("/user/orders");
             }}
           >
             Your orders
@@ -167,13 +163,13 @@ const ProductPage = () => {
             <div className="flex gap-2">
               <button
                 className="border border-red-700 p-2 bg-gray-300"
-                onClick={() => navigate("/signin")}
+                onClick={() => navigate("/user/signin")}
               >
                 Login
               </button>
               <button
                 className="border border-red-700 p-2 bg-blue-300"
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/user/signup")}
               >
                 Register
               </button>

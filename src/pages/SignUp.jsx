@@ -13,17 +13,6 @@ export default function SignUp() {
   const [phoneNo, setPhoneNo] = useState("");
   const [address, setAddress] = useState("");
 
-  const clientDetails = {
-    clientDetails: {
-      name,
-      email,
-      gender,
-      password,
-      phoneNo,
-      address,
-    },
-  };
-
   const cleanUp = () => {
     setName("");
     setEmail("");
@@ -40,23 +29,23 @@ export default function SignUp() {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API1}/user/signup`,
-        clientDetails,
+        {
+          clientDetails: { name, email, gender, password, phoneNo, address },
+        },
         {
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-      cleanUp();
-      setLoading(false);
       alert(response.data.message);
-      navigate("/clientVerification");
-      console.log("You clicked the signUp button!");
+      navigate("/user/verify");
     } catch (error) {
-      cleanUp();
+      console.error(error);
+      navigate("/user/signUp");
+    } finally {
       setLoading(false);
-      console.log(error);
-      navigate("/signUp");
+      cleanUp();
     }
   };
   return (
@@ -100,18 +89,34 @@ export default function SignUp() {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700" htmlFor="gender">
-              gender
+            <label className="block text-sm font-medium text-gray-700">
+              Gender
             </label>
-            <input
-              type="text"
-              name="gender"
-              id="gender"
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              required
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-            />
+            <div className="mt-1">
+              <label className="inline-flex items-center mr-4">
+                <input
+                  type="radio"
+                  value="male"
+                  checked={gender === "male"}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                  required
+                />
+                <span className="ml-2">Male</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  value="female"
+                  checked={gender === "female"}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                  required
+                />
+                <span className="ml-2">Female</span>
+              </label>
+              {/* Add more options as needed */}
+            </div>
           </div>
           <div className="mb-4">
             <label className="block text-gray-700" htmlFor="password">
@@ -165,7 +170,7 @@ export default function SignUp() {
         <div>
           Already have an account.{" "}
           <span
-            onClick={() => navigate("/signIn")}
+            onClick={() => navigate("/user/signIn")}
             style={{ cursor: "pointer" }}
           >
             Login

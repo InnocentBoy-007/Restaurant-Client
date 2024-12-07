@@ -7,20 +7,39 @@ import Cookies from "js-cookie";
 // add cancel order later
 export default function Orders() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   const [trackedOrders, setTrackedOrders] = useState([]);
 
   const token = Cookies.get("clientToken");
+  const [clientDetails, setClientDetails] = useState({});
+
+  const getClientDetails = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+      setClientDetails(response.data.clientDetails);
+    } catch (error) {
+      console.error(error);
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    }
+  };
 
   const trackOrders = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/orders`,
+        `${import.meta.env.VITE_BACKEND_API1}/user/orders/${
+          clientDetails.email
+        }`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setTrackedOrders(response.data.orderDetails);
     } catch (error) {
+      console.log(error);
+
       if (error.response) {
         console.log(error.response.data.message);
         return;
@@ -29,15 +48,25 @@ export default function Orders() {
   };
 
   useEffect(() => {
-    trackOrders();
-  }, []);
+    if (token) {
+      getClientDetails();
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (clientDetails.email) {
+      trackOrders();
+    }
+  }, [clientDetails.email]);
 
   const orderReceivedConfirmation = async (e, orderId) => {
     e.preventDefault();
-    setLoading(true);
+    const email = clientDetails.email;
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/user/order/confirm/${orderId}`,
+        `${
+          import.meta.env.VITE_BACKEND_API1
+        }/user/order/confirm/${orderId}/${email}`,
         {},
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -48,8 +77,6 @@ export default function Orders() {
       if (error.response) {
         console.log(error.response.data.message);
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -57,29 +84,30 @@ export default function Orders() {
     <div>
       <div
         className="w-full p-4 bg-blue-400 text-center cursor-pointer"
-        onClick={() => navigate("/products")}
+        onClick={() => navigate("/user/products")}
       >
         Back
+      </div>
+      <div>
+        <h1 className="p-2">{clientDetails.name}</h1>
       </div>
       {trackedOrders.length === 0 ? (
         <>
           <h1>You haven't place any orders yet</h1>
           <button
             className="border border-red-700 p-2 bg-blue-300 ml-2 cursor-pointer"
-            onClick={() => navigate("/products")}
+            onClick={() => navigate("/user/products")}
           >
             Place an order
           </button>
         </>
       ) : (
-        <div>
-          <h1>Your orders</h1>
+        <div className="mt-2">
           <table className="w-full text-center">
             <thead>
               <tr>
                 <th>Sl no</th>
                 <th>Order ID</th>
-                <th>Ordered by</th>
                 <th>Product Name</th>
                 <th>Product Price</th>
                 <th>Product Quantity</th>
@@ -98,7 +126,6 @@ export default function Orders() {
                 <tr key={index}>
                   <td>{index + 1}</td>
                   <td>{item._id}</td>
-                  <td>{item.clientName}</td>
                   <td>{item.productName}</td>
                   <td>{item.productPrice}</td>
                   <td>{item.productQuantity}</td>
