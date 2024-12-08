@@ -13,7 +13,7 @@ export default function Homepage() {
   const fetchClientDetails = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        `${import.meta.env.VITE_BACKEND_API1}/details`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setClientName(response.data.clientDetails.name);
@@ -33,7 +33,7 @@ export default function Homepage() {
     setLoading(true);
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_API1}/user/logout`,
+        `${import.meta.env.VITE_BACKEND_API1}/logout`,
         {
           headers: {
             "Content-Type": "application/json",

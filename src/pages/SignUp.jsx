@@ -28,7 +28,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/user/signup`,
+        `${import.meta.env.VITE_BACKEND_API1}/signup`,
         {
           clientDetails: { name, email, gender, password, phoneNo, address },
         },
@@ -39,10 +39,10 @@ export default function SignUp() {
         }
       );
       alert(response.data.message);
-      navigate("/user/verify");
+      navigate("/verify");
     } catch (error) {
       console.error(error);
-      navigate("/user/signUp");
+      navigate("/signUp");
     } finally {
       setLoading(false);
       cleanUp();

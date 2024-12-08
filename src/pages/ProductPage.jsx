@@ -23,14 +23,12 @@ const ProductPage = () => {
 
   const fetchProductInfo = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/products`
-      );
+      const response = await axios.get("http://localhost:8000/api/products");
 
       if (!response) {
         console.log("Cannot fetch product details! - frontend");
       }
-      setProductInfo(response.data);
+      setProductInfo(response.data.product);
 
       // console.log("Product details ---->", response.data);
     } catch (error) {
@@ -41,7 +39,7 @@ const ProductPage = () => {
   const fetchClientDetals = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        `${import.meta.env.VITE_BACKEND_API1}/details`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setClientInfo(response.data.clientDetails);
