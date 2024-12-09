@@ -23,7 +23,9 @@ const ProductPage = () => {
 
   const fetchProductInfo = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/products");
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API2}/products`
+      ); // global route (client and admin)
 
       if (!response) {
         console.log("Cannot fetch product details! - frontend");

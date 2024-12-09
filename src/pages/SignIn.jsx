@@ -5,6 +5,8 @@ import Cookies from "js-cookie";
 
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
+  const [sentOTPLoading, setSentOTPLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -40,6 +42,28 @@ export default function SignIn() {
       setLoading(false);
     }
   };
+
+  const sentOTP = async (e) => {
+    e.preventDefault();
+    setSentOTPLoading(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API1}//forgot-password/verify/email`,
+        { email },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      alert(response.data.message);
+      navigate("/user/password");
+    } catch (error) {
+      console.error(error);
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    } finally {
+      setSentOTPLoading(false);
+    }
+  };
+
   return (
     <>
       <div
@@ -50,8 +74,34 @@ export default function SignIn() {
       </div>
       {forgotPasswordFlag ? (
         <>
-          <h1>Forgot password</h1>
-          <button onClick={() => setForgotPasswordFlag(false)}>Sign In</button>
+          <div className="p-2 w-full text-center mt-5">
+            <h1>Forgot password?</h1>
+            <form onSubmit={sentOTP}>
+              <div className="mb-4 w-[50%] mx-auto">
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={email}
+                  placeholder="Enter your email to sent OTP"
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex gap-4 justify-center">
+                <button className="border border-red-600 p-1" type="submit">
+                  {sentOTPLoading ? "Sending OTP..." : "Send OTP"}
+                </button>
+                <button
+                  onClick={() => setForgotPasswordFlag(false)}
+                  className="border border-red-600 p-1"
+                >
+                  Sign In
+                </button>
+              </div>
+            </form>
+          </div>
         </>
       ) : (
         <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-5">

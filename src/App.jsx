@@ -7,6 +7,7 @@ import ProductPage from "./pages/ProductPage";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import BackupJWT from "./pages/BackupJWT";
+import ForgotPassword from "./pages/passwordManagement/forgotPassword";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/user/products/cart" element={<Cart />} />
           <Route path="/user/orders" element={<Orders />} />
           <Route path="/backupjwt" element={<BackupJWT />} />
+          <Route path="/user/password" element={<ForgotPassword />} />
         </Routes>
       </BrowserRouter>
     </>
