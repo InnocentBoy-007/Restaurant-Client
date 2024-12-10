@@ -30,7 +30,7 @@ const ProductPage = () => {
       if (!response) {
         console.log("Cannot fetch product details! - frontend");
       }
-      setProductInfo(response.data.product);
+      setProductInfo(response.data.products);
 
       // console.log("Product details ---->", response.data);
     } catch (error) {

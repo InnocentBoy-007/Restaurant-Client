@@ -16,7 +16,7 @@ export default function Orders() {
   const getClientDetails = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        `${import.meta.env.VITE_BACKEND_API1}/details`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setClientDetails(response.data.clientDetails);
@@ -31,9 +31,7 @@ export default function Orders() {
   const trackOrders = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/orders/${
-          clientDetails.email
-        }`,
+        `${import.meta.env.VITE_BACKEND_API1}/orders/${clientDetails.email}`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setTrackedOrders(response.data.orderDetails);

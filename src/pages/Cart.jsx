@@ -23,7 +23,7 @@ export default function Cart() {
   const fetchClientDetails = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/details`,
+        `${import.meta.env.VITE_BACKEND_API1}/details`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -48,7 +48,7 @@ export default function Cart() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/user/cart/products`,
+        `${import.meta.env.VITE_BACKEND_API1}/cart/products`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

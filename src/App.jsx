@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Homepage from "./pages/Homepage";
 import { ClientVerification } from "./pages/ClientVerification";
-import SignIn from "./pages/signIn";
+import SignIn from "./pages/SignIn";
 import SignUp from "./pages/signUp";
 import ProductPage from "./pages/ProductPage";
 import Cart from "./pages/Cart";
