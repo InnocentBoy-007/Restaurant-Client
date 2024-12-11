@@ -50,7 +50,6 @@ export default function Homepage() {
       Cookies.remove("clientRefreshToken");
 
       // Reset clientName state
-      setClientName("");
       navigate("/");
     } catch (error) {
       if ((error.response.data.message = "Invalid token - backend")) {
@@ -66,39 +65,53 @@ export default function Homepage() {
   };
 
   return (
-    <div className="w-full text-center">
-      {clientName ? (
-        <>
-          <h1>Welcome to Coffee Restuarant, {clientName}</h1>
-          <button style={{ border: "2px solid red" }} onClick={logOut}>
-            {loading ? "logging out..." : "log out"}
-          </button>
-        </>
-      ) : (
-        <>
-          <h1>Welcome to Coffee Restaurant</h1>
-          <div className="flex justify-center gap-4 mt-2">
+    <>
+      <>
+        <div className="w-full text-center flex justify-center flex-col">
+          {clientName ? (
+            <>
+              <h1>Welcome to Coffee Restuarant, {clientName}</h1>
+              <div className="flex gap-2 justify-center">
+                <button className="border border-red-600 p-1" onClick={logOut}>
+                  {loading ? "logging out..." : "log out"}
+                </button>
+                <button
+                  className="border border-red-600 p-1"
+                  onClick={() => navigate("/user/profile")}
+                >
+                  Profile
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1>Welcome to Coffee Restaurant</h1>
+              <div className="flex justify-center gap-4 mt-2">
+                <button
+                  onClick={() => navigate("/user/signUp")}
+                  className="border border-red-700 p-2"
+                >
+                  SignUp
+                </button>
+                <button
+                  onClick={() => navigate("/user/signIn")}
+                  className="border border-red-700 p-2"
+                >
+                  SignIn
+                </button>
+              </div>
+            </>
+          )}
+          <div>
             <button
-              onClick={() => navigate("/user/signUp")}
-              className="border border-red-700 p-2"
+              onClick={() => navigate("/user/products")}
+              className="text-blue-600 border border-red-800 mt-2 p-2"
             >
-              SignUp
-            </button>
-            <button
-              onClick={() => navigate("/user/signIn")}
-              className="border border-red-700 p-2"
-            >
-              SignIn
+              Products
             </button>
           </div>
-        </>
-      )}
-      <button
-        onClick={() => navigate("/user/products")}
-        className="text-blue-600 border border-red-800 mt-2 p-2"
-      >
-        Products
-      </button>
-    </div>
+        </div>
+      </>
+    </>
   );
 }

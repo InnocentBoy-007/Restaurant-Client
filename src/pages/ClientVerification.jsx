@@ -14,7 +14,7 @@ export const ClientVerification = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/user/signup/verify`,
+        `${import.meta.env.VITE_BACKEND_API1}/signup/verify`,
         { otp: OTP },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -27,7 +27,10 @@ export const ClientVerification = () => {
     } catch (error) {
       console.log(error);
       setOTP(""); // remove the old value
-      navigate("/signUp");
+      if (error.response) {
+        navigate("/user/signUp");
+      }
+
       setLoading(false);
     }
   };

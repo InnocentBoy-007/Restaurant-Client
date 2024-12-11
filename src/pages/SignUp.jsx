@@ -39,10 +39,12 @@ export default function SignUp() {
         }
       );
       alert(response.data.message);
-      navigate("/verify");
+      navigate("/user/verify");
     } catch (error) {
       console.error(error);
-      navigate("/signUp");
+      if (error.response) {
+        navigate("/user/signUp");
+      }
     } finally {
       setLoading(false);
       cleanUp();
