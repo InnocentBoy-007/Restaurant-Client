@@ -11,9 +11,27 @@ export default function Profile() {
   }
   const [clientDetails, setClientDetails] = useState({});
 
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [deleteAccountFlag, setDeleteAccountFlag] = useState(false);
+  const [editAccountFlag, setEditAccountFlag] = useState(false);
+
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [accountDeleteLoading, setAccountDeleteLoading] = useState(false);
+  const [accountUpdateLoading, setAccountUpdateLoading] = useState(false);
+
+  const [name, setName] = useState(clientDetails.name);
+  const [email, setEmail] = useState(clientDetails.email);
+  const [phoneNo, setPhoneNo] = useState(clientDetails.phoneNo);
+  const [gender, setGender] = useState(clientDetails.gender);
+  const [address, setAddress] = useState(clientDetails.address);
+  useEffect(() => {
+    if (clientDetails) {
+      setName(clientDetails.name);
+      setEmail(clientDetails.email);
+      setPhoneNo(clientDetails.phoneNo);
+      setGender(clientDetails.gender);
+      setAddress(clientDetails.address);
+    }
+  }, [clientDetails]);
 
   const fetchUserDetails = async () => {
     try {
@@ -59,6 +77,41 @@ export default function Profile() {
     }
   };
 
+  const updateAccount = async (e) => {
+    e.preventDefault();
+    setAccountUpdateLoading(true);
+    const endpoint = `${import.meta.env.VITE_BACKEND_API1}/profile/update`;
+    const data = {
+      clientDetails: {
+        name,
+        email,
+        gender,
+        phoneNo: parseInt(phoneNo),
+        address,
+      },
+    };
+    try {
+      const response = await axios.patch(endpoint, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+      alert(response.data.message);
+      fetchUserDetails();
+      setEditAccountFlag(false);
+    } catch (error) {
+      setAccountUpdateLoading(false);
+      console.error(error);
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
+    } finally {
+      setAccountUpdateLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchUserDetails();
@@ -91,7 +144,15 @@ export default function Profile() {
               <th>Address</th>
               <th>
                 <div className="flex gap-2 justify-center">
-                  <button className="border border-green-600 p-1">Edit</button>
+                  {!editAccountFlag && (
+                    <button
+                      className="border border-green-600 p-1"
+                      onClick={() => setEditAccountFlag(true)}
+                    >
+                      Edit
+                    </button>
+                  )}
+
                   {!deleteAccountFlag && (
                     <button
                       className="border border-red-600 p-1"
@@ -148,6 +209,120 @@ export default function Profile() {
             </div>
           </form>
         </div>
+      )}
+      {editAccountFlag && (
+        <>
+          <div className="mb-4 text-center mt-5 w-[40%] mx-auto">
+            <h1>Edit profile</h1>
+            <form onSubmit={updateAccount}>
+              <div className="mb-4 mt-2">
+                <label className="block text-gray-700" htmlFor="name">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4 mt-2">
+                <label className="block text-gray-700" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4 mt-2">
+                <label className="block text-gray-700" htmlFor="phoneno">
+                  Phone No
+                </label>
+                <input
+                  type="text"
+                  name="phoneno"
+                  id="phoneno"
+                  value={phoneNo}
+                  onChange={(e) => setPhoneNo(e.target.value)}
+                  required
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4 mt-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Gender
+                </label>
+                <div className="mt-1">
+                  <label className="inline-flex items-center mr-4">
+                    <input
+                      type="radio"
+                      value="male"
+                      checked={gender === "male"}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                      required
+                    />
+                    <span className="ml-2">Male</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      value="female"
+                      checked={gender === "female"}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                      required
+                    />
+                    <span className="ml-2">Female</span>
+                  </label>
+                </div>
+              </div>
+              <div className="mb-4 mt-2">
+                <label className="block text-gray-700" htmlFor="address">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex gap-2 justify-center">
+                {accountUpdateLoading ? (
+                  "Updating..."
+                ) : (
+                  <>
+                    <button
+                      className="border border-green-600 p-1"
+                      type="submit"
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => setEditAccountFlag(false)}
+                      className="border border-red-600 p-1"
+                    >
+                      Close
+                    </button>
+                  </>
+                )}
+              </div>
+            </form>
+          </div>
+        </>
       )}
     </>
   );

@@ -117,7 +117,6 @@ export default function SignUp() {
                 />
                 <span className="ml-2">Female</span>
               </label>
-              {/* Add more options as needed */}
             </div>
           </div>
           <div className="mb-4">

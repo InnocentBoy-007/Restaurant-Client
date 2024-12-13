@@ -89,7 +89,7 @@ export default function Cart() {
 
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_API1}/user/cart/remove/${productId}`,
+        `${import.meta.env.VITE_BACKEND_API1}/cart/remove/${productId}`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       alert(response.data.message);
@@ -180,15 +180,31 @@ export default function Cart() {
                     >
                       remove
                     </button>
-                    <button
-                      className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
-                      onClick={() => {
-                        setOrderFlag(true);
-                        setProductId(item.productId);
-                      }}
-                    >
-                      Order
-                    </button>
+                    {orderFlag ? (
+                      <>
+                        <button
+                          className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
+                          onClick={() => {
+                            setOrderFlag(false);
+                            setProductId("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition ml-2"
+                          onClick={() => {
+                            setOrderFlag(true);
+                            setProductId(item.productId);
+                          }}
+                        >
+                          Order
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
               </>
