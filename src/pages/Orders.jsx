@@ -64,7 +64,7 @@ export default function Orders() {
       const response = await axios.post(
         `${
           import.meta.env.VITE_BACKEND_API1
-        }/user/order/confirm/${orderId}/${email}`,
+        }/order/confirm/${orderId}/${email}`,
         {},
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );

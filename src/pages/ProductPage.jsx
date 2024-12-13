@@ -62,7 +62,7 @@ const ProductPage = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/user/cart/add/${productId}`,
+        `${import.meta.env.VITE_BACKEND_API1}/cart/add/${productId}`,
         {}, //empty body
         {
           headers: {
@@ -99,7 +99,7 @@ const ProductPage = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/user/products/placeorder`,
+        `${import.meta.env.VITE_BACKEND_API1}/products/placeorder`,
         orderDetails,
         {
           headers: {
