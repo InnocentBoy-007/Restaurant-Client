@@ -10,6 +10,10 @@ import BackupJWT from "./pages/BackupJWT";
 import ForgotPassword from "./pages/passwordManagement/forgotPassword";
 import Profile from "./pages/profile/Profile";
 
+/**
+ *  for adding a mechanism to retrieve a new token using a refresh token, please refer to an admin frontend file(order.jsx)
+ */
+
 function App() {
   return (
     <>

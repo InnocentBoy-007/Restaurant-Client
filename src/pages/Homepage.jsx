@@ -43,6 +43,7 @@ export default function Homepage() {
         }
       );
       setLoading(false);
+      setClientName("");
       alert(response.data.message);
 
       // Clear the token from cookies
