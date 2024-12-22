@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { FetchClientDetails } from "../../components/FetchDetails";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -31,19 +32,16 @@ export default function Profile() {
       setGender(clientDetails.gender);
       setAddress(clientDetails.address);
     }
-  }, [clientDetails]);
+  }, []);
 
   const fetchUserDetails = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/details`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
-      setClientDetails(response.data.clientDetails);
+      const response = await FetchClientDetails();
+      setClientDetails(response.clientDetails);
     } catch (error) {
       console.error(error);
       if (error.response) {
-        console.log(error.response.data.message);
+        console.log(error.response.message);
       }
     }
   };

@@ -3,10 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import refreshAccessToken from "./RefreshToken";
-import {
-  FetchClientDetails,
-  FetchProductDetails,
-} from "../components/FetchDetails";
+import { FetchProductDetails } from "../components/FetchDetails";
 // database field update by comparing the past orderdetails with the current order details
 
 // test passed
@@ -14,28 +11,23 @@ const ProductPage = () => {
   const navigate = useNavigate();
 
   const token = Cookies.get("clientToken");
-  const [productInfo, setProductInfo] = useState([]);
-  const [clientInfo, setClientInfo] = useState({}); // as an object
 
-  const [productId, setProductId] = useState("");
+  const [productInfo, setProductInfo] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [productQuantity, setProductQuantity] = useState("");
 
-  const [orderConfirmation, setOrderConfirmation] = useState(false);
+  const [orderConfirmationFlag, setOrderConfirmationFlag] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
-  const fetch_clientDetails_productDetails = async () => {
+  const fetch_productDetails = async () => {
     try {
-      const response_clientDetails = await FetchClientDetails();
       const response_productDetails = await FetchProductDetails();
 
-      setClientInfo(response_clientDetails.clientDetails);
       setProductInfo(response_productDetails.productDetails);
     } catch (error) {
       console.error(error);
-      if (error.response_clientDetails) {
-        console.log(error.response_clientDetails.message);
-      } else {
+      if (error.response_productDetails) {
         console.log(error.response_productDetails.message);
       }
     }
@@ -43,25 +35,23 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (token) {
-      fetch_clientDetails_productDetails();
+      fetch_productDetails();
     }
   }, []);
 
   // need testing
   const addToCart = async (e, productId) => {
     e.preventDefault();
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/cart/add/${productId}`;
+    const data = {}; // empty data
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/cart/add/${productId}`,
-        {}, //empty body
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post(URL, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
       alert(response.data.message);
     } catch (error) {
       console.log(error);
@@ -83,8 +73,8 @@ const ProductPage = () => {
     const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/orders`;
     const orderDetails = {
       orderDetails: {
-        productId,
-        productQuantity,
+        productId: selectedProductId,
+        productQuantity: parseInt(productQuantity),
       },
     };
 
@@ -97,13 +87,14 @@ const ProductPage = () => {
         withCredentials: true,
       });
       alert(response.data.message);
-      setOrderConfirmation(false);
+      await fetch_productDetails();
+      setOrderConfirmationFlag(false);
     } catch (error) {
       console.log("Error placing order:", error);
       if (error.response) alert(error.response.data.message);
     } finally {
       setLoading(false);
-      setOrderQuantity("");
+      setProductQuantity("");
     }
   };
 
@@ -186,14 +177,14 @@ const ProductPage = () => {
               <button
                 className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
                 onClick={() => {
-                  setProductId(item._id);
+                  setSelectedProductId(item._id);
                   if (!token) {
                     alert("Please login first to place order");
                     navigate("/signIn");
-                    setProductId("");
+                    setSelectedProductId("");
                     return;
                   }
-                  setOrderConfirmation(true);
+                  setOrderConfirmationFlag(true);
                 }}
               >
                 Order
@@ -214,30 +205,29 @@ const ProductPage = () => {
             </div>
           </div>
         ))}
+        {orderConfirmationFlag && (
+          <div className="w-full flex justify-center mt-20 gap-2 ">
+            <input
+              placeholder="Please enter the quantity of the product you want to purchase"
+              className="border border-red-800"
+              onChange={(e) => setProductQuantity(e.target.value)}
+              value={productQuantity}
+            ></input>
+            <button
+              className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+              onClick={(e) => placeOrder(e)}
+            >
+              Order
+            </button>
+            <button
+              className="border mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+              onClick={() => setOrderConfirmationFlag(false)}
+            >
+              Close
+            </button>
+          </div>
+        )}
       </div>
-
-      {orderConfirmation && (
-        <div className="w-full flex justify-center mt-20 gap-2 ">
-          <input
-            placeholder="Please enter the quantity of the product you want to purchase"
-            className="border border-red-800"
-            onChange={(e) => setProductQuantity(e.target.value)}
-            value={productQuantity}
-          ></input>
-          <button
-            className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-            onClick={(e) => placeOrder(e)}
-          >
-            Order
-          </button>
-          <button
-            className="border mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-            onClick={() => setOrderConfirmation(false)}
-          >
-            Close
-          </button>
-        </div>
-      )}
     </>
   );
 };

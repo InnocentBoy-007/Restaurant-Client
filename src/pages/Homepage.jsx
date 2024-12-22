@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import refreshAccessToken from "./RefreshToken";
+import { FetchClientDetails } from "../components/FetchDetails";
 
 export default function Homepage() {
   const navigate = useNavigate();
@@ -13,18 +14,14 @@ export default function Homepage() {
   const [loading, setLoading] = useState(false);
 
   const fetchClientDetails = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/details`;
     try {
-      const response = await axios.get(URL, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
-      setClientName(response.data.clientDetails.username);
-      setClientTitle(response.data.clientDetails.title);
+      const response = await FetchClientDetails();
+      setClientName(response.clientDetails.username);
+      setClientTitle(response.clientDetails.title);
     } catch (error) {
       console.error(error);
       if (error.response) {
-        console.log(error.response.data.message);
+        console.log(error.response.message);
       }
     }
   };
