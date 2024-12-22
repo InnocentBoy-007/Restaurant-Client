@@ -3,7 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import refreshAccessToken from "./RefreshToken";
-
+import {
+  FetchClientDetails,
+  FetchProductDetails,
+} from "../components/FetchDetails";
 // database field update by comparing the past orderdetails with the current order details
 
 // test passed
@@ -15,45 +18,32 @@ const ProductPage = () => {
   const [clientInfo, setClientInfo] = useState({}); // as an object
 
   const [productId, setProductId] = useState("");
-  const [orderQuantity, setOrderQuantity] = useState("");
+  const [productQuantity, setProductQuantity] = useState("");
 
   const [orderConfirmation, setOrderConfirmation] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
-  const fetchProductInfo = async () => {
+  const fetch_clientDetails_productDetails = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API2}/products`
-      ); // global route (client and admin)
+      const response_clientDetails = await FetchClientDetails();
+      const response_productDetails = await FetchProductDetails();
 
-      if (!response) {
-        console.log("Cannot fetch product details! - frontend");
+      setClientInfo(response_clientDetails.clientDetails);
+      setProductInfo(response_productDetails.productDetails);
+    } catch (error) {
+      console.error(error);
+      if (error.response_clientDetails) {
+        console.log(error.response_clientDetails.message);
+      } else {
+        console.log(error.response_productDetails.message);
       }
-      setProductInfo(response.data.products);
-
-      // console.log("Product details ---->", response.data);
-    } catch (error) {
-      console.log("Error fetching product details! - frontend", error);
-    }
-  };
-
-  const fetchClientDetals = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/details`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
-      setClientInfo(response.data.clientDetails);
-    } catch (error) {
-      console.log(error);
     }
   };
 
   useEffect(() => {
     if (token) {
-      fetchProductInfo();
-      fetchClientDetals();
+      fetch_clientDetails_productDetails();
     }
   }, []);
 
@@ -90,25 +80,22 @@ const ProductPage = () => {
   const placeOrder = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/orders`;
     const orderDetails = {
       orderDetails: {
         productId,
-        productQuantity: orderQuantity,
+        productQuantity,
       },
     };
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/products/placeorder`,
-        orderDetails,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post(URL, orderDetails, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
       alert(response.data.message);
       setOrderConfirmation(false);
     } catch (error) {
@@ -234,8 +221,8 @@ const ProductPage = () => {
           <input
             placeholder="Please enter the quantity of the product you want to purchase"
             className="border border-red-800"
-            onChange={(e) => setOrderQuantity(e.target.value)}
-            value={orderQuantity}
+            onChange={(e) => setProductQuantity(e.target.value)}
+            value={productQuantity}
           ></input>
           <button
             className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"

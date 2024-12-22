@@ -6,18 +6,19 @@ import refreshAccessToken from "./RefreshToken";
 
 export default function Homepage() {
   const navigate = useNavigate();
+
   const [clientName, setClientName] = useState("");
   const [clientTitle, setClientTitle] = useState("");
-
   const token = Cookies.get("clientToken");
   const [loading, setLoading] = useState(false);
 
   const fetchClientDetails = async () => {
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/details`;
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/details`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
+      const response = await axios.get(URL, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
       setClientName(response.data.clientDetails.username);
       setClientTitle(response.data.clientDetails.title);
     } catch (error) {
@@ -37,17 +38,15 @@ export default function Homepage() {
   const logOut = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/logout`;
     try {
-      const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_API1}/account/logout`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.delete(URL, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
       setLoading(false);
       setClientName("");
       alert(response.data.message);
