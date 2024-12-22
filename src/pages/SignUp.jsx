@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export default function SignUp() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +15,7 @@ export default function SignUp() {
   const [address, setAddress] = useState("");
 
   const cleanUp = () => {
-    setName("");
+    setUsername("");
     setEmail("");
     setGender("");
     setPassword("");
@@ -26,18 +27,18 @@ export default function SignUp() {
   const signUp = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/signup`;
+    const data = {
+      clientDetails: { username, email, gender, password, phoneNo, address },
+    };
+
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/signup`,
-        {
-          clientDetails: { name, email, gender, password, phoneNo, address },
+      const response = await axios.post(URL, data, {
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      });
       alert(response.data.message);
       navigate("/user/verify");
     } catch (error) {
@@ -68,10 +69,10 @@ export default function SignUp() {
             </label>
             <input
               type="text"
-              name="name"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              name="username"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
             />

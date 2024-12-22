@@ -12,21 +12,26 @@ export const ClientVerification = () => {
   const confirmOTP = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/signup/verifyOTP`;
+    const data = {
+      otp: OTP,
+    };
+
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/signup/verify`,
-        { otp: OTP },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const response = await axios.post(URL, data, {
+        headers: { "Content-Type": "application/json" },
+      });
       setLoading(false);
       setOTP("");
       Cookies.set("clientToken", response.data.token); // this contains the name of the client
-      Cookies.set("clientRefreshToken", response.data.token); // this contains the name of the client
+      Cookies.set("clientRefreshToken", response.data.refreshToken); // this contains the name of the client
       navigate("/"); // navigate to index page after the verification is completed
     } catch (error) {
       console.log(error);
       setOTP(""); // remove the old value
       if (error.response) {
+        Cookies.remove("ClientToken");
         navigate("/user/signUp");
       }
 

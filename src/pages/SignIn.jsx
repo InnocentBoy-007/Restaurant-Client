@@ -27,15 +27,17 @@ export default function SignIn() {
     // console.log(clientDetails);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/signin`,
+        `${import.meta.env.VITE_BACKEND_API1}/account/signin`,
         clientDetails,
         {
           headers: { "Content-Type": "application/json" },
         }
       );
+      alert(response.data.message);
       setLoading(false);
       Cookies.set("clientToken", response.data.token); // it last for only 15 minutes
       Cookies.set("clientRefreshToken", response.data.refreshToken);
+
       navigate("/");
     } catch (error) {
       console.log(error);

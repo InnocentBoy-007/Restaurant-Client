@@ -7,6 +7,8 @@ import refreshAccessToken from "./RefreshToken";
 export default function Homepage() {
   const navigate = useNavigate();
   const [clientName, setClientName] = useState("");
+  const [clientTitle, setClientTitle] = useState("");
+
   const token = Cookies.get("clientToken");
   const [loading, setLoading] = useState(false);
 
@@ -16,9 +18,13 @@ export default function Homepage() {
         `${import.meta.env.VITE_BACKEND_API1}/details`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
-      setClientName(response.data.clientDetails.name);
+      setClientName(response.data.clientDetails.username);
+      setClientTitle(response.data.clientDetails.title);
     } catch (error) {
       console.error(error);
+      if (error.response) {
+        console.log(error.response.data.message);
+      }
     }
   };
 
@@ -33,7 +39,7 @@ export default function Homepage() {
     setLoading(true);
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_API1}/logout`,
+        `${import.meta.env.VITE_BACKEND_API1}/account/logout`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -71,7 +77,9 @@ export default function Homepage() {
         <div className="w-full text-center flex justify-center flex-col">
           {clientName ? (
             <>
-              <h1>Welcome to Coffee Restuarant, {clientName}</h1>
+              <h1>
+                Welcome to Coffee Restuarant, {clientTitle}. {clientName}
+              </h1>
               <div className="flex gap-2 justify-center">
                 <button className="border border-red-600 p-1" onClick={logOut}>
                   {loading ? "logging out..." : "log out"}

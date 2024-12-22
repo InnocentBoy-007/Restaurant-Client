@@ -53,7 +53,7 @@ export default function Profile() {
     setAccountDeleteLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/details/delete`,
+        `${import.meta.env.VITE_BACKEND_API1}/account/details/delete`,
         { password: confirmPassword },
         {
           headers: {
