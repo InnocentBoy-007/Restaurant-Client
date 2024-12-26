@@ -21,7 +21,7 @@ export default function Homepage() {
     } catch (error) {
       console.error(error);
       if (error.response) {
-        console.log(error.response.message);
+        console.log(error.response.fetchClientDetails_error);
       }
     }
   };

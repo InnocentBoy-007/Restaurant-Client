@@ -16,10 +16,7 @@ export async function AddProductsToCart(productId) {
       },
       withCredentials: true,
     });
-    return {
-      addedProductDetails: response.data.addedProduct,
-      message: response.data.message,
-    };
+    return { message: response.data.message };
   } catch (error) {
     console.error(error);
     if (error.response) {

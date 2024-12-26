@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import refreshAccessToken from "./RefreshToken";
+import {
+  FetchClientDetails,
+  FetchProductDetails_Cart,
+} from "../components/FetchDetails";
 
 export default function Cart() {
   const token = Cookies.get("clientToken");
@@ -22,57 +26,26 @@ export default function Cart() {
 
   const fetchClientDetails = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/details`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
-      setClientDetails(response.data.clientDetails);
+      const response = await FetchClientDetails();
+      setClientDetails(response.clientDetails);
     } catch (error) {
-      console.log(error);
-      Cookies.remove("clientToken");
-      if ((error.response.data.message = "Invalid token - backend")) {
-        const newToken = await refreshAccessToken(navigate);
-        if (newToken) {
-          return fetchClientDetails();
-        } else {
-          alert(response.data.message);
-        }
+      console.error(error);
+      if (error.response) {
+        console.log(error.response.fetchClientDetails_error);
       }
     }
   };
 
   const fetchProductsFromCart = async () => {
-    setLoading(true);
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/cart/products`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-
-      setCartProducts(response.data.cartDetails);
-      setNoCartProductsMessage(response.data.message);
+      const response = await FetchProductDetails_Cart();
+      setCartProducts(response);
     } catch (error) {
-      if (
-        error.response.message ==
-        "An unexpected error occured while trying to fetch a refreshed token! - backend"
-      ) {
-        const newToken = await refreshAccessToken(navigate);
-        if (newToken) {
-          return fetchProductsFromCart();
-        } else {
-          alert("Token expired! - backend");
-        }
+      console.error(error);
+      if (error.response) {
+        console.log(error.response.fetchProductDetails_Cart_error);
+        setNoCartProductsMessage(error.response.fetchProductDetails_Cart_error);
       }
-    } finally {
-      setLoading(false);
     }
   };
 

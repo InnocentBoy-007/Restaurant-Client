@@ -3,6 +3,10 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import {
+  FetchClientDetails,
+  FetchOrderDetails,
+} from "../components/FetchDetails";
 
 // add cancel order later
 export default function Orders() {
@@ -15,32 +19,24 @@ export default function Orders() {
 
   const getClientDetails = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/details`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
-      setClientDetails(response.data.clientDetails);
+      const response = await FetchClientDetails();
+      setClientDetails(response.clientDetails);
     } catch (error) {
       console.error(error);
       if (error.response) {
-        console.log(error.response.data.message);
+        console.log(error.response.fetchClientDetails_error);
       }
     }
   };
 
   const trackOrders = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/orders/${clientDetails.email}`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
-      setTrackedOrders(response.data.orderDetails);
+      const response = await FetchOrderDetails();
+      setTrackedOrders(response.orderDetails);
     } catch (error) {
-      console.log(error);
-
+      console.error(error);
       if (error.response) {
-        console.log(error.response.data.message);
-        return;
+        console.log(error.response.fetchOrderDetails_error);
       }
     }
   };

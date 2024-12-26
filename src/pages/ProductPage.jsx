@@ -24,12 +24,11 @@ const ProductPage = () => {
   const fetch_productDetails = async () => {
     try {
       const response_productDetails = await FetchProductDetails();
-
       setProductInfo(response_productDetails.productDetails);
     } catch (error) {
       console.error(error);
       if (error.response_productDetails) {
-        console.log(error.response_productDetails.message);
+        console.log(error.response_productDetails.fetchProductDetails_error);
       }
     }
   };
@@ -56,7 +55,9 @@ const ProductPage = () => {
   const placeOrder = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/orders`;
+    const URL = `${
+      import.meta.env.VITE_BACKEND_API1
+    }/v1/customers/orders/place_order`;
     const orderDetails = {
       orderDetails: {
         productId: selectedProductId,
