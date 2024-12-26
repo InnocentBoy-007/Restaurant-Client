@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import refreshAccessToken from "./RefreshToken";
 import { FetchProductDetails } from "../components/FetchDetails";
+import { AddProductsToCart } from "../components/CartController";
 // database field update by comparing the past orderdetails with the current order details
 
 // test passed
@@ -39,31 +40,16 @@ const ProductPage = () => {
     }
   }, []);
 
-  // need testing
   const addToCart = async (e, productId) => {
     e.preventDefault();
-    const URL = `${import.meta.env.VITE_BACKEND_API1}/cart/add/${productId}`;
-    const data = {}; // empty data
     try {
-      const response = await axios.post(URL, data, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-      alert(response.data.message);
+      const response = await AddProductsToCart(productId);
+      console.log(response.message);
     } catch (error) {
-      console.log(error);
-      if (error.response.data.message == "Invalid token - backend") {
-        const newToken = await refreshAccessToken(navigate);
-        if (newToken) {
-          return addToCart(e, productId);
-        }
-      } else {
-        alert(error.response.data.message);
+      console.error(error);
+      if (error.response) {
+        console.log(error.response.addProductsToCart_error);
       }
-      // console.log(error);
     }
   };
 
