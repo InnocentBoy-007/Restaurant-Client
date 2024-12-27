@@ -41,14 +41,11 @@ const ProductPage = () => {
 
   const addToCart = async (e, productId) => {
     e.preventDefault();
-    try {
-      const response = await AddProductsToCart(productId);
-      console.log(response.message);
-    } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.log(error.response.addProductsToCart_error);
-      }
+    const response = await AddProductsToCart(productId); // No try-catch needed here
+    if (response.addProductsToCart_error) {
+      alert(response.addProductsToCart_error); // Show the error message if it exists
+    } else {
+      alert(response.message); // Show the success message
     }
   };
 

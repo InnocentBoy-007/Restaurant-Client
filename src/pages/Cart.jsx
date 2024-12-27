@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import refreshAccessToken from "./RefreshToken";
 import {
   FetchClientDetails,
   FetchProductDetails_Cart,
 } from "../components/FetchDetails";
+import { RemoveProductsFromCart } from "../components/CartController";
+import refreshAccessToken from "./RefreshToken";
 
 export default function Cart() {
   const token = Cookies.get("clientToken");
@@ -57,19 +58,13 @@ export default function Cart() {
   // test passed
   const removeFromCart = async (e, productId) => {
     e.preventDefault();
-    // console.log("ProductId -->", productId);
-    // console.log("Token-->", token);
-
     try {
-      const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_API1}/cart/remove/${productId}`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
-      alert(response.data.message);
+      const response = await RemoveProductsFromCart(productId);
+      alert(response.message);
       fetchProductsFromCart(); // refreshing the page
     } catch (error) {
       console.log(error);
-      if (error.response) alert(error.response.data.message);
+      if (error.response) alert(error.response.removeProductsFromCart_error);
     }
   };
 

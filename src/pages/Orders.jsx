@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import {
   FetchClientDetails,
-  FetchOrderDetails,
+  TrackOrderDetails,
 } from "../components/FetchDetails";
 
 // add cancel order later
@@ -31,7 +31,7 @@ export default function Orders() {
 
   const trackOrders = async () => {
     try {
-      const response = await FetchOrderDetails();
+      const response = await TrackOrderDetails();
       setTrackedOrders(response.orderDetails);
     } catch (error) {
       console.error(error);
@@ -44,14 +44,9 @@ export default function Orders() {
   useEffect(() => {
     if (token) {
       getClientDetails();
-    }
-  }, [token]);
-
-  useEffect(() => {
-    if (clientDetails.email) {
       trackOrders();
     }
-  }, [clientDetails.email]);
+  }, [token]);
 
   const orderReceivedConfirmation = async (e, orderId) => {
     e.preventDefault();

@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 
 const token = Cookies.get("clientToken"); // declaring the token as a global value
 
+// function to fetch client details
 export async function FetchClientDetails() {
   const URL = `${import.meta.env.VITE_BACKEND_API1}/account/details`;
   try {
@@ -22,6 +23,7 @@ export async function FetchClientDetails() {
   }
 }
 
+// function to fetch product details (global route)
 export async function FetchProductDetails() {
   const URL = `${import.meta.env.VITE_BACKEND_API2}/product/details`;
   try {
@@ -38,6 +40,7 @@ export async function FetchProductDetails() {
   }
 }
 
+// function to fetch product details from cart
 export async function FetchProductDetails_Cart() {
   const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/cart/fetch`;
   try {
@@ -57,7 +60,8 @@ export async function FetchProductDetails_Cart() {
   }
 }
 
-export async function FetchOrderDetails() {
+// function to track the order details
+export async function TrackOrderDetails() {
   const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/cart/fetch`;
   try {
     const response = await axios.get(URL, {
