@@ -1,54 +1,57 @@
-import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import generateNewPassword from "./ForgetPassword";
+import Cookies from "js-cookie";
 
 export default function forgotPassword() {
+  const navigate = useNavigate();
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [otpSessionFlag, setOtpSessionFlag] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const navigate = useNavigate();
+  const token = Cookies.get("clientToken");
+  //   const refreshToken = Cookies.get("clientRefreshToken"); // add the refresh token later
 
+  // function to verify otp
   const verifyOTP = async (e) => {
     e.preventDefault();
     setSubmitLoading(true);
+
+    const body = {
+      otp,
+    };
+
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/forgot-password/verify/otp`,
-        { otp },
-        { headers: { "Content-Type": "Application/json" } }
-      );
-      alert(response.data.message);
+      await generateNewPassword.verifyOTP(body, token);
+      setSubmitLoading(false);
       setOtpSessionFlag(false);
     } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.error(error.response.data.message);
-      }
-    } finally {
-      setOtp("");
+      Cookies.remove("clientToken");
+      Cookies.remove("clientRefreshToken");
       setSubmitLoading(false);
+      setOtpSessionFlag(false);
     }
   };
 
-  const sentNewPassword = async (e) => {
+  // function to set new password
+  const changeNewPassword = async (e) => {
     e.preventDefault();
     setSubmitLoading(true);
+
+    const body = {
+      newPassword,
+    };
+
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/forget-password/change-password`,
-        { newPassword },
-        { headers: { "Content-Type": "Application/json" } }
-      );
-      alert(response.data.message);
+      await generateNewPassword.setNewPassword(body, token);
+      setSubmitLoading(false);
       navigate("/user/signIn");
+      Cookies.remove("clientToken");
+      Cookies.remove("clientRefreshToken");
     } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
-    } finally {
+      Cookies.remove("clientToken");
+      Cookies.remove("clientRefreshToken");
       setSubmitLoading(false);
     }
   };
@@ -80,7 +83,7 @@ export default function forgotPassword() {
           </>
         ) : (
           <>
-            <form onSubmit={sentNewPassword}>
+            <form onSubmit={changeNewPassword}>
               <div className="mb-4 w-[50%] mx-auto">
                 <input
                   type="password"

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import generateNewPassword from "./passwordManagement/ForgetPassword";
 
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
@@ -45,23 +46,20 @@ export default function SignIn() {
     }
   };
 
-  const sentOTP = async (e) => {
+  // function to send OTP to reset the password
+  const requestOTP = async (e) => {
     e.preventDefault();
     setSentOTPLoading(true);
+
+    const body = {
+      email,
+    };
+
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}//forgot-password/verify/email`,
-        { email },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      alert(response.data.message);
+      await generateNewPassword.requestOTP(body);
+      setSentOTPLoading(false);
       navigate("/user/password");
     } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.log(error.response.data.message);
-      }
-    } finally {
       setSentOTPLoading(false);
     }
   };
@@ -78,7 +76,7 @@ export default function SignIn() {
         <>
           <div className="p-2 w-full text-center mt-5">
             <h1>Forgot password?</h1>
-            <form onSubmit={sentOTP}>
+            <form onSubmit={requestOTP}>
               <div className="mb-4 w-[50%] mx-auto">
                 <input
                   type="email"

@@ -62,7 +62,9 @@ export async function FetchProductDetails_Cart() {
 
 // function to track the order details
 export async function TrackOrderDetails() {
-  const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/cart/fetch`;
+  const URL = `${
+    import.meta.env.VITE_BACKEND_API1
+  }/v1/customers/orders/track_orders`;
   try {
     const response = await axios.get(URL, {
       headers: {
