@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import primaryActions from "../components/PrimaryActions";
 import generateNewPassword from "./passwordManagement/ForgetPassword";
 
 export default function SignIn() {
@@ -15,33 +16,22 @@ export default function SignIn() {
 
   const [forgotPasswordFlag, setForgotPasswordFlag] = useState(false);
 
-  const clientDetails = {
-    clientDetails: {
-      email,
-      password,
-    },
-  };
-
   const signIn = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // console.log(clientDetails);
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/account/signin`,
-        clientDetails,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      alert(response.data.message);
-      setLoading(false);
-      Cookies.set("clientToken", response.data.token); // it last for only 15 minutes
-      Cookies.set("clientRefreshToken", response.data.refreshToken);
 
+    const body = {
+      clientDetails: {
+        email,
+        password,
+      },
+    };
+
+    try {
+      await primaryActions.signIn(body);
+      setLoading(false);
       navigate("/");
     } catch (error) {
-      console.log(error);
       setLoading(false);
     }
   };

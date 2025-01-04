@@ -3,19 +3,21 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import refreshAccessToken from "./RefreshToken";
-import { FetchClientDetails } from "../components/FetchDetails";
+// import { FetchClientDetails } from "../components/FetchDetails";
+import fetchDetails from "../components/FetchDetails";
 
 export default function Homepage() {
   const navigate = useNavigate();
 
   const [clientName, setClientName] = useState("");
   const [clientTitle, setClientTitle] = useState("");
-  const token = Cookies.get("clientToken");
   const [loading, setLoading] = useState(false);
+
+  const token = Cookies.get("clientToken");
 
   const fetchClientDetails = async () => {
     try {
-      const response = await FetchClientDetails();
+      const response = await fetchDetails.FetchClientDetails(token);
       setClientName(response.clientDetails.username);
       setClientTitle(response.clientDetails.title);
     } catch (error) {
