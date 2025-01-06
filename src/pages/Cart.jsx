@@ -2,12 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import {
-  FetchClientDetails,
-  FetchProductDetails_Cart,
-} from "../components/FetchDetails";
+import fetchDetails from "../components/FetchDetails";
 import { RemoveProductsFromCart } from "../components/CartController";
-import refreshAccessToken from "./RefreshToken";
 
 export default function Cart() {
   const token = Cookies.get("clientToken");

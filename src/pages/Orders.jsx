@@ -3,10 +3,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import {
-  FetchClientDetails,
-  TrackOrderDetails,
-} from "../components/FetchDetails";
+import fetchDetails from "../components/FetchDetails";
 
 // add cancel order later
 export default function Orders() {

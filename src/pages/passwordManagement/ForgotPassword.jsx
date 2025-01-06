@@ -7,29 +7,28 @@ export default function forgotPassword() {
   const navigate = useNavigate();
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [otpSessionFlag, setOtpSessionFlag] = useState(true);
-  const [submitLoading, setSubmitLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const token = Cookies.get("clientToken");
   //   const refreshToken = Cookies.get("clientRefreshToken"); // add the refresh token later
 
   // function to verify otp
-  const verifyOTP = async (e) => {
+  const confirmOTP = async (e) => {
     e.preventDefault();
-    setSubmitLoading(true);
-
-    const body = {
-      otp,
-    };
+    setLoading(true);
 
     try {
-      await generateNewPassword.verifyOTP(body, token);
-      setSubmitLoading(false);
-      setOtpSessionFlag(false);
+      const response = await generateNewPassword.confirmOTP({ otp }, token);
+      if (response) {
+        setLoading(false);
+        setOtpSessionFlag(false);
+      }
     } catch (error) {
       Cookies.remove("clientToken");
       Cookies.remove("clientRefreshToken");
-      setSubmitLoading(false);
+      setLoading(false);
       setOtpSessionFlag(false);
     }
   };
@@ -37,22 +36,31 @@ export default function forgotPassword() {
   // function to set new password
   const changeNewPassword = async (e) => {
     e.preventDefault();
-    setSubmitLoading(true);
+    setLoading(true);
 
-    const body = {
-      newPassword,
-    };
+    if (newPassword !== confirmPassword) {
+      setNewPassword("");
+      setConfirmPassword("");
+      setLoading(false);
+      return alert("The confirm password is incorrect!");
+    }
 
     try {
-      await generateNewPassword.setNewPassword(body, token);
-      setSubmitLoading(false);
-      navigate("/user/signIn");
-      Cookies.remove("clientToken");
-      Cookies.remove("clientRefreshToken");
+      const response = await generateNewPassword.setNewPassword(
+        { newPassword },
+        token
+      );
+      if (response) {
+        setLoading(false);
+        navigate("/user/signIn");
+      }
     } catch (error) {
+      setLoading(false);
+    } finally {
+      setNewPassword("");
+      setConfirmPassword("");
       Cookies.remove("clientToken");
       Cookies.remove("clientRefreshToken");
-      setSubmitLoading(false);
     }
   };
   return (
@@ -60,7 +68,7 @@ export default function forgotPassword() {
       <div className="w-full p-2">
         {otpSessionFlag ? (
           <>
-            <form onSubmit={verifyOTP}>
+            <form onSubmit={confirmOTP}>
               <div className="mb-4 w-[50%] mx-auto">
                 <input
                   type="text"
@@ -76,7 +84,7 @@ export default function forgotPassword() {
                   type="submit"
                   className="border border-red-600 p-1 mt-2"
                 >
-                  {submitLoading ? "Submitting..." : "Submit"}
+                  {loading ? "Submitting..." : "Submit"}
                 </button>
               </div>
             </form>
@@ -95,11 +103,21 @@ export default function forgotPassword() {
                   required
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
                 />
+                <input
+                  type="password"
+                  name="confirmpassword"
+                  id="confirmpassword"
+                  value={confirmPassword}
+                  placeholder="Re-enter the new password.."
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                />
                 <button
                   type="submit"
                   className="border border-red-600 p-1 mt-2"
                 >
-                  {submitLoading ? "Submitting..." : "Submit"}
+                  {loading ? "Submitting..." : "Submit"}
                 </button>
               </div>
             </form>

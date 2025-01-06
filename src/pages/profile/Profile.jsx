@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { FetchClientDetails } from "../../components/FetchDetails";
+import fetchDetails from "../../components/FetchDetails";
 
 export default function Profile() {
   const navigate = useNavigate();

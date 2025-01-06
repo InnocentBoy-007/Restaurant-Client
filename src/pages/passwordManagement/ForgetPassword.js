@@ -11,54 +11,80 @@ import Cookies from "js-cookie";
  */
 
 class GenerateNewPassword {
-    async requestOTP(body) {
-        if (!body || typeof body !== 'object') return alert("Invalid body!");
+    async requestOTP(data) {
+        if (!data || typeof data !== 'object') return alert("Invalid body!");
 
         const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/password/forgot-password/verify/email`
 
         try {
-            const response = await axios.post(URL, body, { headers: { "Content-Type": "application/json" } });
-            Cookies.set("clientToken", response.data.token);
-            Cookies.set("clientRefreshToken", response.data.refreshToken);
+            const response = await axios.post(URL, data, { headers: { "Content-Type": "application/json" } });
+            const { token, refreshToken, message } = response.data;
+            Cookies.set("clientToken", token);
+            Cookies.set("clientRefreshToken", refreshToken);
+            alert(message);
 
-            alert(response.data.message);
+            return true;
         } catch (error) {
             console.error(error);
-            if (error.response) alert(error.response.data.message);
+            if (error.response) {
+                alert(error.response.data.message)
+            } else if (error.request) {
+                alert("Network error! Please try again later!");
+            } else {
+                alert("An unexpected error occurred while trying to request an OTP!");
+            }
+            return false;
         }
     }
 
     // add refreshToken later
-    async verifyOTP(body, token) {
-        if (!body || typeof body !== 'object') return alert("Invalid body!");
+    async confirmOTP(data, token) {
+        if (!data || typeof data !== 'object') return alert("Invalid body!");
         if (!token || typeof token !== 'string') return alert("Invalid token!");
 
         const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/password/forgot-password/verify/otp`;
 
         try {
-            const response = await axios.post(URL, body, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
-
+            const response = await axios.post(URL, data, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
             alert(response.data.message);
+
+            return true;
         } catch (error) {
             console.error(error);
-            if (error.response) alert(error.response.data.message);
+            if (error.response) {
+                alert(error.response.data.message)
+            } else if (error.request) {
+                alert("Network error! Please try again later!");
+            } else {
+                alert("An unexpected error occured while trying to confirm the otp!");
+            }
+
+            return false;
         }
     }
 
     // add refreshToken later
-    async setNewPassword(body, token) {
-        if (!body || typeof body !== 'object') return alert("Invalid body!");
+    async setNewPassword(data, token) {
+        if (!data || typeof data !== 'object') return alert("Invalid body!");
         if (!token || typeof token !== 'string') return alert("Invalid token!");
 
         const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/password/forgot-password/change-password`;
 
         try {
-            const response = await axios.post(URL, body, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
-
+            const response = await axios.post(URL, data, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
             alert(response.data.message);
+
+            return true;
         } catch (error) {
             console.error(error);
-            if (error.response) alert(error.response.data.message)
+            if (error.response) {
+                alert(error.response.data.message);
+            } else if (error.request) {
+                alert("Network error! Please try again later!");
+            } else {
+                alert("An unexpected error occured while trying to set new password!");
+            }
+            return false;
         }
     }
 }

@@ -2,8 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import refreshAccessToken from "./RefreshToken";
-import { FetchProductDetails } from "../components/FetchDetails";
+import fetchDetails from "../components/FetchDetails";
 import { AddProductsToCart } from "../components/CartController";
 // database field update by comparing the past orderdetails with the current order details
 

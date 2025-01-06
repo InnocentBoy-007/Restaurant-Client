@@ -1,19 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Cookies from "js-cookie";
 import primaryActions from "../components/PrimaryActions";
 import generateNewPassword from "./passwordManagement/ForgetPassword";
 
 export default function SignIn() {
-  const [loading, setLoading] = useState(false);
-  const [sentOTPLoading, setSentOTPLoading] = useState(false);
-
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [forgotPasswordFlag, setForgotPasswordFlag] = useState(false);
 
   const signIn = async (e) => {
@@ -39,18 +34,18 @@ export default function SignIn() {
   // function to send OTP to reset the password
   const requestOTP = async (e) => {
     e.preventDefault();
-    setSentOTPLoading(true);
-
-    const body = {
-      email,
-    };
+    setLoading(true);
 
     try {
-      await generateNewPassword.requestOTP(body);
-      setSentOTPLoading(false);
-      navigate("/user/password");
+      const response = await generateNewPassword.requestOTP({ email });
+      if (response) {
+        setLoading(false);
+        setEmail("");
+        navigate("/user/password");
+      }
     } catch (error) {
-      setSentOTPLoading(false);
+      setEmail("");
+      setLoading(false);
     }
   };
 
@@ -81,7 +76,7 @@ export default function SignIn() {
               </div>
               <div className="flex gap-4 justify-center">
                 <button className="border border-red-600 p-1" type="submit">
-                  {sentOTPLoading ? "Sending OTP..." : "Send OTP"}
+                  {loading ? "Sending OTP..." : "Send OTP"}
                 </button>
                 <button
                   onClick={() => setForgotPasswordFlag(false)}
