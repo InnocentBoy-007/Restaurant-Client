@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import primaryActions from "../components/PrimaryActions";
 import generateNewPassword from "./passwordManagement/ForgetPassword";
@@ -11,11 +12,17 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [forgotPasswordFlag, setForgotPasswordFlag] = useState(false);
 
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setLoading(false);
+  };
+
   const signIn = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const body = {
+    const data = {
       clientDetails: {
         email,
         password,
@@ -23,11 +30,15 @@ export default function SignIn() {
     };
 
     try {
-      await primaryActions.signIn(body);
-      setLoading(false);
-      navigate("/");
+      const response = await primaryActions.SignIn(data);
+      if (response.success) {
+        Cookies.set("clientToken", response.token);
+        Cookies.set("clientRefreshToken", response.refreshToken);
+        resetForm();
+        navigate("/");
+      }
     } catch (error) {
-      setLoading(false);
+      resetForm();
     }
   };
 
@@ -38,7 +49,7 @@ export default function SignIn() {
 
     try {
       const response = await generateNewPassword.requestOTP({ email });
-      if (response) {
+      if (response.success) {
         setLoading(false);
         setEmail("");
         navigate("/user/password");

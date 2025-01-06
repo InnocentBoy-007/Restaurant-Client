@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import refreshAccessToken from "./RefreshToken";
-// import { FetchClientDetails } from "../components/FetchDetails";
+import primaryActions from "../components/PrimaryActions";
 import fetchDetails from "../components/FetchDetails";
 
 export default function Homepage() {
@@ -37,35 +37,22 @@ export default function Homepage() {
   const logOut = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/logout`;
+
     try {
-      const response = await axios.delete(URL, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-      setLoading(false);
-      setClientName("");
-      alert(response.data.message);
-
-      // Clear the token from cookies
-      Cookies.remove("clientToken");
-      Cookies.remove("clientRefreshToken");
-
-      // Reset clientName state
-      navigate("/");
-    } catch (error) {
-      if ((error.response.data.message = "Invalid token - backend")) {
-        const newToken = await refreshAccessToken(navigate);
-        if (newToken) {
-          return logOut(e);
-        }
-      } else {
-        console.log(error);
+      const response = await primaryActions.Logout(token);
+      if (response.success) {
         setLoading(false);
+        setClientName("");
+
+        // Clear the token from cookies
+        Cookies.remove("clientToken");
+        Cookies.remove("clientRefreshToken");
+
+        // Reset clientName state
+        navigate("/");
       }
+    } catch (error) {
+      setLoading(false);
     }
   };
 

@@ -16,7 +16,7 @@ export default function Orders() {
 
   const getClientDetails = async () => {
     try {
-      const response = await FetchClientDetails();
+      const response = await fetchDetails.FetchClientDetails();
       setClientDetails(response.clientDetails);
     } catch (error) {
       console.error(error);
@@ -28,7 +28,7 @@ export default function Orders() {
 
   const trackOrders = async () => {
     try {
-      const response = await TrackOrderDetails();
+      const response = await fetchDetails.TrackOrderDetails();
       setTrackedOrders(response.orderDetails);
     } catch (error) {
       console.error(error);

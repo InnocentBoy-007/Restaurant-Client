@@ -3,6 +3,7 @@ import axios from "axios";
 class FetchDetails {
     async FetchClientDetails(token) {
         const URL = `${import.meta.env.VITE_BACKEND_API1}/account/details`;
+
         try {
             const response = await axios.get(URL, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
 
@@ -13,15 +14,27 @@ class FetchDetails {
         }
     }
 
-    async FetchProductDetails(token) {
+    async FetchProductDetails() {
         const URL = `${import.meta.env.VITE_BACKEND_API2}/product/details`;
-        try {
-            const response = await axios.get(URL, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
 
-            return { productDetails: response.data.products };
+        try {
+            const response = await axios.get(URL, { headers: { "Content-Type": "application/json" } });
+            if (response) {
+                return { productDetails: response.data.products };
+            }
+
+            return true;
         } catch (error) {
             console.error(error);
-            if (error.response) alert(error.response.data.message);
+            if (error.response) {
+                alert(error.response.data.message)
+            } else if (error.request) {
+                alert("Network error! Please try again later!");
+            } else {
+                alert("An unexpected error occured while trying to fetch product details!");
+            }
+
+            return false;
         }
     }
 

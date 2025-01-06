@@ -3,26 +3,24 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
-import { AddProductsToCart } from "../components/CartController";
-// database field update by comparing the past orderdetails with the current order details
+import cartController from "../components/CartController";
 
 // test passed
 const ProductPage = () => {
   const navigate = useNavigate();
 
   const token = Cookies.get("clientToken");
-
+  // const refreshToken = Cookies.get("clientRefreshToken"); // add later
   const [productInfo, setProductInfo] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [productQuantity, setProductQuantity] = useState("");
 
   const [orderConfirmationFlag, setOrderConfirmationFlag] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   const fetch_productDetails = async () => {
     try {
-      const response_productDetails = await FetchProductDetails();
+      const response_productDetails = await fetchDetails.FetchProductDetails();
       setProductInfo(response_productDetails.productDetails);
     } catch (error) {
       console.error(error);
@@ -39,12 +37,17 @@ const ProductPage = () => {
   }, []);
 
   const addToCart = async (e, productId) => {
+    setLoading(true);
     e.preventDefault();
-    const response = await AddProductsToCart(productId); // No try-catch needed here
-    if (response.addProductsToCart_error) {
-      alert(response.addProductsToCart_error); // Show the error message if it exists
-    } else {
-      alert(response.message); // Show the success message
+    try {
+      const response = await cartController.AddProductsToCart(productId, token);
+      if (response) {
+        setLoading(false);
+        setSelectedProductId("");
+      }
+    } catch (error) {
+      setLoading(false);
+      setSelectedProductId("");
     }
   };
 
@@ -183,7 +186,7 @@ const ProductPage = () => {
                   }
                 }}
               >
-                add to cart
+                {loading ? "adding..." : "add to cart"}
               </button>
             </div>
           </div>

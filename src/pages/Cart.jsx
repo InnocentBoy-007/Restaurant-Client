@@ -3,17 +3,17 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
-import { RemoveProductsFromCart } from "../components/CartController";
+import cartController from "../components/CartController";
 
 export default function Cart() {
   const token = Cookies.get("clientToken");
+  // const refreshToken = Cookies.get("clientRefreshToken"); // add later
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const [clientDetails, setClientDetails] = useState({}); // object
   const [cartProducts, setCartProducts] = useState([]); // array
   const [noCartProductMessage, setNoCartProductsMessage] = useState("");
 
-  const [loading, setLoading] = useState(false);
   const [placeOrderLoading, setPlaceOrderLoading] = useState(false);
 
   const [productId, setProductId] = useState("");
@@ -21,21 +21,9 @@ export default function Cart() {
 
   const [orderFlag, setOrderFlag] = useState(false);
 
-  const fetchClientDetails = async () => {
-    try {
-      const response = await FetchClientDetails();
-      setClientDetails(response.clientDetails);
-    } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.log(error.response.fetchClientDetails_error);
-      }
-    }
-  };
-
   const fetchProductsFromCart = async () => {
     try {
-      const response = await FetchProductDetails_Cart();
+      const response = await fetchDetails.FetchProductDetails_Cart(token);
       setCartProducts(response);
     } catch (error) {
       console.error(error);
@@ -47,20 +35,23 @@ export default function Cart() {
   };
 
   useEffect(() => {
-    fetchClientDetails();
     fetchProductsFromCart();
   }, []);
 
   // test passed
   const removeFromCart = async (e, productId) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const response = await RemoveProductsFromCart(productId);
-      alert(response.message);
-      fetchProductsFromCart(); // refreshing the page
+      const response = await cartController.RemoveProductsFromCart(productId);
+      if (response) {
+        setProductId("");
+        setLoading(false);
+        fetchProductsFromCart(); // refreshing the page
+      }
     } catch (error) {
-      console.log(error);
-      if (error.response) alert(error.response.removeProductsFromCart_error);
+      setProductId("");
+      setLoading(false);
     }
   };
 
@@ -71,7 +62,7 @@ export default function Cart() {
     const orderDetails = {
       orderDetails: {
         productId,
-        productQuantity: orderQuantity,
+        productQuantity: parseInt(orderQuantity),
       },
     };
     // console.log("Ordering clientDetails--->", clientDetails);

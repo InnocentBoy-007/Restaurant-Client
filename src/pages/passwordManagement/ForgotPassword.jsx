@@ -21,7 +21,7 @@ export default function forgotPassword() {
 
     try {
       const response = await generateNewPassword.confirmOTP({ otp }, token);
-      if (response) {
+      if (response.success) {
         setLoading(false);
         setOtpSessionFlag(false);
       }
@@ -50,7 +50,7 @@ export default function forgotPassword() {
         { newPassword },
         token
       );
-      if (response) {
+      if (response.success) {
         setLoading(false);
         navigate("/user/signIn");
       }

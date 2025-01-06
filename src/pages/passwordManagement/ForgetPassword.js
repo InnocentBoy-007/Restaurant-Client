@@ -23,7 +23,7 @@ class GenerateNewPassword {
             Cookies.set("clientRefreshToken", refreshToken);
             alert(message);
 
-            return true;
+            return { success: true };
         } catch (error) {
             console.error(error);
             if (error.response) {
@@ -33,7 +33,6 @@ class GenerateNewPassword {
             } else {
                 alert("An unexpected error occurred while trying to request an OTP!");
             }
-            return false;
         }
     }
 
@@ -48,7 +47,7 @@ class GenerateNewPassword {
             const response = await axios.post(URL, data, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
             alert(response.data.message);
 
-            return true;
+            return { success: true };
         } catch (error) {
             console.error(error);
             if (error.response) {
@@ -58,8 +57,6 @@ class GenerateNewPassword {
             } else {
                 alert("An unexpected error occured while trying to confirm the otp!");
             }
-
-            return false;
         }
     }
 
@@ -74,7 +71,7 @@ class GenerateNewPassword {
             const response = await axios.post(URL, data, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
             alert(response.data.message);
 
-            return true;
+            return { success: true };
         } catch (error) {
             console.error(error);
             if (error.response) {
@@ -84,7 +81,6 @@ class GenerateNewPassword {
             } else {
                 alert("An unexpected error occured while trying to set new password!");
             }
-            return false;
         }
     }
 }
