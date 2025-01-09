@@ -2,7 +2,7 @@ import axios from "axios";
 
 class FetchDetails {
     async FetchClientDetails(token) {
-        const URL = `${import.meta.env.VITE_BACKEND_API1}/account/details`;
+        const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/account/details`;
 
         try {
             const response = await axios.get(URL, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });

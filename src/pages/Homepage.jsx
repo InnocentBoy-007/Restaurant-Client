@@ -63,7 +63,7 @@ export default function Homepage() {
           {clientName ? (
             <>
               <h1>
-                Welcome to Coffee Restuarant, {clientTitle}. {clientName}
+                Welcome to Coffee Restuarant, {clientTitle} {clientName}
               </h1>
               <div className="flex gap-2 justify-center">
                 <button className="border border-red-600 p-1" onClick={logOut}>
