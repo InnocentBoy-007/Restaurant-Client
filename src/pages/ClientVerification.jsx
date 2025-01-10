@@ -13,7 +13,7 @@ export const ClientVerification = () => {
     e.preventDefault();
     setLoading(true);
 
-    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/signup/verifyOTP`;
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/account/signup/verifyOTP`;
     const data = {
       otp: OTP,
     };

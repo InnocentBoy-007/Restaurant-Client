@@ -9,13 +9,13 @@ export default function SignIn() {
 
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
+  const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
   const [forgotPasswordFlag, setForgotPasswordFlag] = useState(false);
 
   const resetForm = () => {
     setEmail("");
-    setUsername("");
+    setPhoneNo("");
     setPassword("");
     setLoading(false);
   };
@@ -27,7 +27,7 @@ export default function SignIn() {
     const data = {
       clientDetails: {
         email,
-        username,
+        phoneNo,
         password,
       },
     };
@@ -109,19 +109,19 @@ export default function SignIn() {
           <form onSubmit={signIn}>
             <div className="mb-4">
               <label className="block text-gray-700" htmlFor="emailorusername">
-                Email or Username
+                Email or Phone
               </label>
               <input
                 type="text"
                 name="emailorusername"
                 id="emailorusername"
-                value={email || username}
+                value={email || phoneNo}
                 onChange={(e) => {
                     if(e.target.value.includes("@")) {
                         setEmail(e.target.value);
-                        setUsername("");
+                        setPhoneNo("");
                     } else {
-                        setUsername(e.target.value);
+                        setPhoneNo(e.target.value);
                         setEmail("");
                     }
                 }}

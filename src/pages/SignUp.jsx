@@ -28,7 +28,7 @@ export default function SignUp() {
     e.preventDefault();
     setLoading(true);
 
-    const URL = `${import.meta.env.VITE_BACKEND_API1}/account/signup`;
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/account/signup`;
     const data = {
       clientDetails: { username, email, gender, password, phoneNo, address },
     };
@@ -44,6 +44,7 @@ export default function SignUp() {
     } catch (error) {
       console.error(error);
       if (error.response) {
+        alert(error.response.data.message);
         navigate("/user/signUp");
       }
     } finally {
