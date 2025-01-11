@@ -30,9 +30,7 @@ class CartController {
         try {
             const response = await axios.delete(URL, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
 
-            alert(response.data.message);
-
-            return true;
+            return {message: response.data.message, success:true};
         } catch (error) {
             console.error(error);
             if (error.response) {

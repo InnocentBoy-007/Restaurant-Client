@@ -22,6 +22,7 @@ export const ClientVerification = () => {
       const response = await axios.post(URL, data, {
         headers: { "Content-Type": "application/json" },
       });
+      alert(response.data.message);
       setLoading(false);
       setOTP("");
       Cookies.set("clientToken", response.data.token); // this contains the name of the client

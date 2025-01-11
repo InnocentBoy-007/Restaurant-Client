@@ -4,6 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
 import cartController from "../components/CartController";
+import services from "../components/services";
 
 export default function Cart() {
   const token = Cookies.get("clientToken");
@@ -22,15 +23,11 @@ export default function Cart() {
   const [orderFlag, setOrderFlag] = useState(false);
 
   const fetchProductsFromCart = async () => {
-    try {
-      const response = await fetchDetails.FetchProductDetails_Cart(token);
-      setCartProducts(response);
-    } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.log(error.response.fetchProductDetails_Cart_error);
-        setNoCartProductsMessage(error.response.fetchProductDetails_Cart_error);
-      }
+    const response = await fetchDetails.FetchProductDetails_Cart(token);
+    if (response.success) {
+      setCartProducts(response.products);
+    } else if (response.message) {
+      setNoCartProductsMessage(response.message);
     }
   };
 
@@ -59,42 +56,26 @@ export default function Cart() {
   const placeOrder = async (e) => {
     e.preventDefault();
     setPlaceOrderLoading(true);
-    const orderDetails = {
+    const data = {
       orderDetails: {
         productId,
         productQuantity: parseInt(orderQuantity),
       },
     };
-    // console.log("Ordering clientDetails--->", clientDetails);
+
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API1}/user/products/placeorder`,
-        orderDetails,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-      setOrderQuantity("");
-      setPlaceOrderLoading(false);
-      setOrderFlag(false);
-      alert(response.data.message);
+      const response = await services.PlaceOrder(data, token);
+      if (response.success) {
+        setOrderQuantity("");
+        setPlaceOrderLoading(false);
+        setOrderFlag(false);
 
-      // removing the products from the cart after placing the order
-      await axios.delete(
-        `${import.meta.env.VITE_BACKEND_API1}/user/cart/remove/${productId}`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
-
-      fetchProductsFromCart(); // updating the page
+        await cartController.RemoveProductsFromCart(productId, token);
+        navigate("/user/products");
+      }
     } catch (error) {
-      console.log(error);
       setOrderQuantity("");
       setPlaceOrderLoading(false);
-      if (error.response) alert(error.response.data.message);
     }
   };
 

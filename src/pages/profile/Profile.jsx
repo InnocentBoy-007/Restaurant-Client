@@ -9,7 +9,7 @@ import secondaryActions from "../../components/secondaryActions";
 export default function PersonalDetails() {
   const navigate = useNavigate();
   const token = Cookies.get("clientToken");
-//   const refreshToken = Cookies.get("clientRefreshToken"); // add later
+  //   const refreshToken = Cookies.get("clientRefreshToken"); // add later
 
   if (!token) {
     navigate("/");
@@ -21,6 +21,7 @@ export default function PersonalDetails() {
   const [loading, setLoading] = useState(false);
 
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
 
@@ -86,7 +87,7 @@ export default function PersonalDetails() {
           username: clientDetails.username,
           email: clientDetails.email,
           phoneNo: clientDetails.phoneNo,
-          gender: clientDetails.gender
+          gender: clientDetails.gender,
         },
       };
 
@@ -127,9 +128,10 @@ export default function PersonalDetails() {
     e.preventDefault();
     setLoading(true);
 
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setLoading(false);
       setPassword("");
+      setNewPassword("");
       setConfirmPassword("");
       return alert(
         "Error! The confirm password must be same as the new password!"
@@ -137,24 +139,28 @@ export default function PersonalDetails() {
     }
 
     const URL = `${
-      import.meta.env.VITE_BACKEND_API
+      import.meta.env.VITE_BACKEND_API1
     }/v1/customers/password/change-password`;
 
+    const data = {
+      passwords: {
+        currentPassword: password,
+        newPassword,
+      },
+    };
+
     try {
-      const response = await axios.patch(
-        URL,
-        { password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.patch(URL, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
 
       alert(response.data.message);
       setPassword("");
+      setNewPassword("");
       setConfirmPassword("");
       setLoading(false);
       setEditPasswordFlag(false);
@@ -164,6 +170,7 @@ export default function PersonalDetails() {
         alert(error.response.data.message);
       }
       setPassword("");
+      setNewPassword("");
       setConfirmPassword("");
       setLoading(false);
       setEditPasswordFlag(false);
@@ -172,7 +179,9 @@ export default function PersonalDetails() {
 
   // Function to check if there are any changes
   const hasChanges = () => {
-    return JSON.stringify(clientDetails) !== JSON.stringify(initialClientDetails);
+    return (
+      JSON.stringify(clientDetails) !== JSON.stringify(initialClientDetails)
+    );
   };
 
   useEffect(() => {
@@ -419,9 +428,18 @@ export default function PersonalDetails() {
                       <input
                         type="password"
                         id="password"
-                        placeholder="Enter a new password"
+                        placeholder="Enter the current password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                        required
+                      />
+                      <input
+                        type="password"
+                        id="newpassword"
+                        placeholder="Enter a new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
                         required
                       />
@@ -445,7 +463,7 @@ export default function PersonalDetails() {
                         <button
                           type="submit"
                           className="bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-green-200"
-                          disabled={!password || !confirmPassword} // Disable the button if password is empty
+                          disabled={!password || !newPassword || !confirmPassword} // Disable the button if password is empty
                         >
                           Update
                         </button>
