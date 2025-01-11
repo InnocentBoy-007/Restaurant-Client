@@ -22,14 +22,11 @@ export default function Cart() {
   const [orderFlag, setOrderFlag] = useState(false);
 
   const fetchProductsFromCart = async () => {
-    try {
-      const response = await fetchDetails.FetchProductDetails_Cart(token);
-      setCartProducts(response);
-    } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.log(error.response.fetchProductDetails_Cart_error);
-        setNoCartProductsMessage(error.response.fetchProductDetails_Cart_error);
+    const response = await fetchDetails.FetchProductDetails_Cart(token);
+    if (response.success) {
+      setCartProducts(response.productDetails);
+      if (response.message === "No items inside the cart!") {
+        setNoCartProductsMessage("No items inside the cart!");
       }
     }
   };
@@ -114,7 +111,7 @@ export default function Cart() {
           </div>
         ) : (
           <>
-            {cartProducts.length === 0 ? (
+            {noCartProductMessage ? (
               <h1>{noCartProductMessage}</h1>
             ) : (
               <>
