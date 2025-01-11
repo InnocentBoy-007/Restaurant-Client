@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import secondaryActions from "../../components/secondaryActions";
+import fetchDetails from "../../components/FetchDetails";
 
 export default function PersonalDetails() {
   const navigate = useNavigate();
@@ -33,24 +34,14 @@ export default function PersonalDetails() {
   const fetchClientDetails = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API1}/v1/customers/account/details`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-      setLoading(false);
-      setClientDetails(response.data.clientDetails);
-      setInitialClientDetails(response.data.clientDetails); // Set initial state
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
-      if (error.response) {
-        console.log(error.response.data.message);
+      const response = await fetchDetails.FetchClientDetails(token);
+      if (response.success) {
+        setLoading(false);
+        setClientDetails(response.clientDetails);
+        setInitialClientDetails(response.clientDetails); // Set initial state
       }
+    } catch (error) {
+      setLoading(false);
     }
   };
 

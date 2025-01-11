@@ -25,9 +25,16 @@ export default function Cart() {
   const fetchProductsFromCart = async () => {
     const response = await fetchDetails.FetchProductDetails_Cart(token);
     if (response.success) {
+<<<<<<< HEAD
       setCartProducts(response.products);
     } else if (response.message) {
       setNoCartProductsMessage(response.message);
+=======
+      setCartProducts(response.productDetails);
+      if (response.message === "No items inside the cart!") {
+        setNoCartProductsMessage("No items inside the cart!");
+      }
+>>>>>>> 3dc62eaae14ac43a8c03e5158f6677af51892a19
     }
   };
 
@@ -95,7 +102,7 @@ export default function Cart() {
           </div>
         ) : (
           <>
-            {cartProducts.length === 0 ? (
+            {noCartProductMessage ? (
               <h1>{noCartProductMessage}</h1>
             ) : (
               <>

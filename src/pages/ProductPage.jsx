@@ -1,9 +1,8 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
-import services from "../components/services";
+import productController from "../components/ProductController";
 import cartController from "../components/CartController";
 
 // test passed
@@ -19,31 +18,28 @@ const ProductPage = () => {
   const [orderConfirmationFlag, setOrderConfirmationFlag] = useState(false);
   const [screenLoading, setScreenLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
 
   const fetch_productDetails = async () => {
     setScreenLoading(true);
     const response = await fetchDetails.FetchProductDetails();
     if (response.success) {
-      setScreenLoading(false);
       setProductInfo(response.productDetails);
+      setScreenLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetch_productDetails();
-  }, []);
-
   const addToCart = async (e, productId) => {
-    setLoading(true);
+    setAddLoading(true);
     e.preventDefault();
     try {
       const response = await cartController.AddProductsToCart(productId, token);
-      if (response) {
-        setLoading(false);
+      if (response.success) {
+        setAddLoading(false);
         setSelectedProductId("");
       }
     } catch (error) {
-      setLoading(false);
+      setAddLoading(false);
       setSelectedProductId("");
     }
   };
@@ -51,7 +47,6 @@ const ProductPage = () => {
   const placeOrder = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const data = {
       orderDetails: {
         productId: selectedProductId,
@@ -60,7 +55,7 @@ const ProductPage = () => {
     };
 
     try {
-      const response = await services.PlaceOrder(data, token);
+      const response = await productController.PlaceOrder(data, token);
       if (response.success) {
         await fetch_productDetails();
         setOrderConfirmationFlag(false);
@@ -70,6 +65,10 @@ const ProductPage = () => {
       setProductQuantity("");
     }
   };
+
+  useEffect(() => {
+    fetch_productDetails();
+  }, [token]);
 
   return (
     <>
@@ -94,7 +93,7 @@ const ProductPage = () => {
                 onClick={() => {
                   if (!token) {
                     alert("You need to signin first! - warning!");
-                    navigate("/");
+                    navigate("/user/signIn");
                     return;
                   }
                   navigate("/user/products/cart");
@@ -121,7 +120,7 @@ const ProductPage = () => {
                 <div className="flex gap-2">
                   <button
                     className="border border-red-700 p-2 bg-gray-300"
-                    onClick={() => navigate("/user/signIn")}
+                    onClick={() => navigate("/user/signin")}
                   >
                     Login
                   </button>
@@ -160,7 +159,7 @@ const ProductPage = () => {
                       setSelectedProductId(item._id);
                       if (!token) {
                         alert("Please login first to place order");
-                        navigate("/user/signIn");
+                        navigate("/signIn");
                         setSelectedProductId("");
                         return;
                       }
@@ -175,36 +174,38 @@ const ProductPage = () => {
                       addToCart(e, item._id);
                       if (!token) {
                         alert("Please login first to add products in cart");
-                        navigate("/user/signIn");
+                        navigate("/signin");
                         return;
                       }
                     }}
                   >
-                    {loading ? "adding..." : "add to cart"}
+                    {addLoading ? "adding..." : "add to cart"}
                   </button>
                 </div>
               </div>
             ))}
             {orderConfirmationFlag && (
               <div className="w-full flex justify-center mt-20 gap-2 ">
-                <input
-                  placeholder="Please enter the quantity of the product you want to purchase"
-                  className="border border-red-800"
-                  onChange={(e) => setProductQuantity(e.target.value)}
-                  value={productQuantity}
-                ></input>
-                <button
-                  className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                  onClick={(e) => placeOrder(e)}
-                >
-                  Order
-                </button>
-                <button
-                  className="border mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                  onClick={() => setOrderConfirmationFlag(false)}
-                >
-                  Close
-                </button>
+                <form onSubmit={placeOrder}>
+                  <input
+                    placeholder="Please enter the quantity of the product you want to purchase"
+                    className="border border-red-800"
+                    onChange={(e) => setProductQuantity(e.target.value)}
+                    value={productQuantity}
+                  ></input>
+                  <button
+                    className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                    onClick={(e) => placeOrder(e)}
+                  >
+                    {loading ? "Ordering..." : "Order"}
+                  </button>
+                  <button
+                    type="submit"
+                    className="border mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                  >
+                    Close
+                  </button>
+                </form>
               </div>
             )}
           </div>

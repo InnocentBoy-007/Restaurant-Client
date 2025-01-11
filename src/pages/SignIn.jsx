@@ -117,13 +117,13 @@ export default function SignIn() {
                 id="emailorusername"
                 value={email || phoneNo}
                 onChange={(e) => {
-                    if(e.target.value.includes("@")) {
-                        setEmail(e.target.value);
-                        setPhoneNo("");
-                    } else {
-                        setPhoneNo(e.target.value);
-                        setEmail("");
-                    }
+                  if (e.target.value.includes("@")) {
+                    setEmail(e.target.value);
+                    setPhoneNo("");
+                  } else {
+                    setPhoneNo(e.target.value);
+                    setEmail("");
+                  }
                 }}
                 required
                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"

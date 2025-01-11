@@ -48,6 +48,8 @@ export default function Orders() {
   useEffect(() => {
     getClientDetails();
     trackOrders();
+    getClientDetails();
+    trackOrders();
   }, [token]);
 
   const orderReceivedConfirmation = async (e, orderId) => {
