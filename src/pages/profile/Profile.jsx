@@ -184,7 +184,7 @@ export default function PersonalDetails() {
       <div className="m-3">
         <button
           className="w-32 bg-red-800 text-white font-semibold py-2 rounded-md hover:bg-red-600 transition duration-200"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/user/homepage")}
         >
           Back
         </button>
@@ -454,7 +454,9 @@ export default function PersonalDetails() {
                         <button
                           type="submit"
                           className="bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-green-200"
-                          disabled={!password || !newPassword || !confirmPassword} // Disable the button if password is empty
+                          disabled={
+                            !password || !newPassword || !confirmPassword
+                          } // Disable the button if password is empty
                         >
                           Update
                         </button>

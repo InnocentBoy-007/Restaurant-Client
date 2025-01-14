@@ -4,13 +4,19 @@ import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
 import productController from "../components/ProductController";
 import cartController from "../components/CartController";
+import { isTokenExpired } from "../components/isTokenExpired";
+import { RefreshToken } from "../components/RefreshToken";
+import { jwtDecode } from "jwt-decode";
 
 // test passed
 const ProductPage = () => {
   const navigate = useNavigate();
 
-  const token = Cookies.get("clientToken");
-  // const refreshToken = Cookies.get("clientRefreshToken"); // add later
+  let token = Cookies.get("clientToken");
+  const refreshToken = Cookies.get("clientRefreshToken");
+  const decodedToken = jwtDecode(refreshToken);
+  const clientId = decodedToken.clientId;
+
   const [productInfo, setProductInfo] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [productQuantity, setProductQuantity] = useState("");
@@ -20,8 +26,16 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
 
+  const checkToken = async () => {
+    if (!token || isTokenExpired(token)) {
+      token = await RefreshToken(refreshToken, clientId);
+    }
+  };
+
   const fetch_productDetails = async () => {
+    await checkToken();
     setScreenLoading(true);
+
     const response = await fetchDetails.FetchProductDetails();
     if (response.success) {
       setProductInfo(response.productDetails);
@@ -30,8 +44,10 @@ const ProductPage = () => {
   };
 
   const addToCart = async (e, productId) => {
+    await checkToken();
     setAddLoading(true);
     e.preventDefault();
+
     try {
       const response = await cartController.AddProductsToCart(productId, token);
       if (response.success) {
@@ -45,6 +61,7 @@ const ProductPage = () => {
   };
 
   const placeOrder = async (e) => {
+    await checkToken();
     e.preventDefault();
     setLoading(true);
     const data = {
@@ -75,7 +92,7 @@ const ProductPage = () => {
       <div
         className="w-full bg-blue-600 p-2 text-center"
         style={{ cursor: "pointer" }}
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/user/homepage")}
       >
         Back
       </div>
@@ -93,7 +110,7 @@ const ProductPage = () => {
                 onClick={() => {
                   if (!token) {
                     alert("You need to signin first! - warning!");
-                    navigate("/user/signIn");
+                    navigate("/");
                     return;
                   }
                   navigate("/user/products/cart");

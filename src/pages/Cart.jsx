@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
 import cartController from "../components/CartController";
 import services from "../components/services";
+import { jwtDecode } from "jwt-decode";
+import { isTokenExpired } from "../components/isTokenExpired";
+import { RefreshToken } from "../components/RefreshToken";
 
 export default function Cart() {
-  const token = Cookies.get("clientToken");
-  // const refreshToken = Cookies.get("clientRefreshToken"); // add later
+  let token = Cookies.get("clientToken");
+  const refreshToken = Cookies.get("clientRefreshToken");
+  const decodedToken = jwtDecode(refreshToken);
+  const clientId = decodedToken.clientId;
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +27,14 @@ export default function Cart() {
 
   const [orderFlag, setOrderFlag] = useState(false);
 
+  const checkToken = async () => {
+    if (!token || isTokenExpired(token)) {
+      token = await RefreshToken(refreshToken, clientId);
+    }
+  };
+
   const fetchProductsFromCart = async () => {
+    await checkToken();
     const response = await fetchDetails.FetchProductDetails_Cart(token);
     if (response.success) {
       setCartProducts(response.products);
@@ -37,10 +49,14 @@ export default function Cart() {
 
   // test passed
   const removeFromCart = async (e, productId) => {
+    await checkToken();
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await cartController.RemoveProductsFromCart(productId);
+      const response = await cartController.RemoveProductsFromCart(
+        productId,
+        token
+      );
       if (response) {
         setProductId("");
         setLoading(false);
@@ -54,6 +70,7 @@ export default function Cart() {
 
   // function for placing order from the cart
   const placeOrder = async (e) => {
+    await checkToken();
     e.preventDefault();
     setPlaceOrderLoading(true);
     const data = {

@@ -38,7 +38,7 @@ export default function SignIn() {
         Cookies.set("clientToken", response.token);
         Cookies.set("clientRefreshToken", response.refreshToken);
         resetForm();
-        navigate("/");
+        navigate("/user/homepage");
       }
     } catch (error) {
       resetForm();

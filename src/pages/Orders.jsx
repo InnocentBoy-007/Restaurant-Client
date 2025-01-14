@@ -1,10 +1,12 @@
 import React from "react";
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
 import services from "../components/services";
+import { jwtDecode } from "jwt-decode";
+import { isTokenExpired } from "../components/isTokenExpired";
+import { RefreshToken } from "../components/RefreshToken";
 
 // add cancel order later
 export default function Orders() {
@@ -14,13 +16,22 @@ export default function Orders() {
   const [noOrdersMessage, setNoOrdersMessage] = useState("");
   const [screenLoading, setScreenLoading] = useState("");
 
-  const token = Cookies.get("clientToken");
-  //   const refreshToken = Cookies.get("clientRefreshToken"); // add later
+  let token = Cookies.get("clientToken");
+  const refreshToken = Cookies.get("clientRefreshToken");
+  const decodedToken = jwtDecode(refreshToken);
+  const clientId = decodedToken.clientId;
 
   const [clientDetails, setClientDetails] = useState({});
 
+  const checkToken = async () => {
+    if (!token || isTokenExpired(token)) {
+      token = RefreshToken(refreshToken, clientId);
+    }
+  };
+
   const getClientDetails = async () => {
-    if (token) {
+    await checkToken();
+    if (token || typeof token === "string") {
       const response = await fetchDetails.FetchClientDetails(token);
       setClientDetails(response.clientDetails);
     } else {
@@ -29,8 +40,9 @@ export default function Orders() {
   };
 
   const trackOrders = async () => {
+    await checkToken();
     setScreenLoading(true);
-    if (token) {
+    if (token || typeof token === "string") {
       const response = await fetchDetails.TrackOrderDetails(token);
       if (response.success) {
         setTrackedOrders(response.orderDetails);
@@ -53,12 +65,13 @@ export default function Orders() {
   }, [token]);
 
   const orderReceivedConfirmation = async (e, orderId) => {
+    await checkToken();
     e.preventDefault();
 
     const response = await services.OrderReceivedConfirmation(orderId, token);
     if (response) {
       await trackOrders();
-    };
+    }
   };
 
   return (

@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 class FetchDetails {
     async FetchClientDetails(token) {
@@ -13,7 +14,9 @@ class FetchDetails {
         } catch (error) {
             console.error(error);
             if (error.response) {
-                alert(error.response.data.message)
+                Cookies.remove("clientToken");
+                Cookies.remove("clientRefreshToken");
+                alert("Session expired!");
             } else if (error.request) {
                 alert("Network error! Please try again later!");
             } else {
@@ -69,13 +72,13 @@ class FetchDetails {
 
         try {
             const response = await axios.get(URL, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
-            const {orderDetails} = response.data;
+            const { orderDetails } = response.data;
 
-            return {orderDetails, success:true};
+            return { orderDetails, success: true };
         } catch (error) {
             console.error(error);
             if (error.response) {
-                return {message:error.response.data.message};
+                return { message: error.response.data.message };
             } else if (error.request) {
                 alert("Network error! Please try again later!");
             } else {

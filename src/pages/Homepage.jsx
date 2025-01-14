@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import axios from "axios";
-import refreshAccessToken from "./RefreshToken";
 import primaryActions from "../components/PrimaryActions";
 import fetchDetails from "../components/FetchDetails";
+import { isTokenExpired } from "../components/isTokenExpired";
+import { RefreshToken } from "../components/RefreshToken";
+import { jwtDecode } from "jwt-decode";
 
 export default function Homepage() {
   const navigate = useNavigate();
@@ -13,28 +14,32 @@ export default function Homepage() {
   const [clientTitle, setClientTitle] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const token = Cookies.get("clientToken");
+  let token = Cookies.get("clientToken");
+  const refreshToken = Cookies.get("clientRefreshToken");
+  const decodedToken = jwtDecode(refreshToken);
+  const clientId = decodedToken.clientId;
+
+  const checkToken = async () => {
+    if (!token || isTokenExpired(token)) {
+      token = await RefreshToken(refreshToken, clientId);
+    }
+  };
 
   const fetchClientDetails = async () => {
-    try {
+    await checkToken();
+    if (token && typeof token === "string") {
       const response = await fetchDetails.FetchClientDetails(token);
       setClientName(response.clientDetails.username);
       setClientTitle(response.clientDetails.title);
-    } catch (error) {
-      console.error(error);
-      if (error.response) {
-        console.log(error.response.fetchClientDetails_error);
-      }
     }
   };
 
   useEffect(() => {
-    if (token) {
-      fetchClientDetails();
-    }
-  }, []);
+    fetchClientDetails();
+  }, [token]);
 
   const logOut = async (e) => {
+    await checkToken();
     e.preventDefault();
     setLoading(true);
 
@@ -62,9 +67,15 @@ export default function Homepage() {
         <div className="w-full text-center flex justify-center flex-col">
           {clientName ? (
             <>
-              <h1>
-                Welcome to Coffee Restuarant, {clientTitle} {clientName}
-              </h1>
+              <div>
+                {clientTitle && clientName ? (
+                  <h1>
+                    Welcome to Coffee Restuarant, {clientTitle} {clientName}
+                  </h1>
+                ) : (
+                  <h1>Welcome to Coffee Restuarant</h1>
+                )}
+              </div>
               <div className="flex gap-2 justify-center">
                 <button className="border border-red-600 p-1" onClick={logOut}>
                   {loading ? "logging out..." : "log out"}
@@ -88,7 +99,7 @@ export default function Homepage() {
                   SignUp
                 </button>
                 <button
-                  onClick={() => navigate("/user/signIn")}
+                  onClick={() => navigate("/")} // signIn page
                   className="border border-red-700 p-2"
                 >
                   SignIn
