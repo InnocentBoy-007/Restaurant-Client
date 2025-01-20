@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import primaryActions from "../components/PrimaryActions";
@@ -12,6 +12,12 @@ export default function SignIn() {
   const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
   const [forgotPasswordFlag, setForgotPasswordFlag] = useState(false);
+
+  useEffect(() => {
+    if (Cookies.get("clientToken")) {
+      navigate("/user/homepage");
+    }
+  }, []);
 
   const resetForm = () => {
     setEmail("");
@@ -67,7 +73,7 @@ export default function SignIn() {
     <>
       <div
         className="w-full bg-blue-500 p-4 text-center"
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/user/homepage")}
       >
         Home
       </div>

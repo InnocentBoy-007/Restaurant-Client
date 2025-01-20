@@ -1,15 +1,16 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export const RefreshToken = async (refreshToken, clientId) => {
-    Cookies.remove("clientToken");
-    const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/token/refresh-token/${clientId}`
+export const RefreshToken = async (refreshToken) => {
+    if (!refreshToken || typeof refreshToken !== 'string') return console.log("The refresh token is either invalid or is not a string or is not found!");
+
+    const URL = `${import.meta.env.VITE_BACKEND_API1}/v1/customers/token/refresh-token`
 
     try {
         const response = await axios.post(URL, {}, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${refreshToken}` }, withCredentials: true });
         const { token } = response.data;
 
-        return token;
+        return { token };
     } catch (error) {
         console.error(error);
         if (error.response) {

@@ -5,29 +5,28 @@ import primaryActions from "../components/PrimaryActions";
 import fetchDetails from "../components/FetchDetails";
 import { isTokenExpired } from "../components/isTokenExpired";
 import { RefreshToken } from "../components/RefreshToken";
-import { jwtDecode } from "jwt-decode";
 
 export default function Homepage() {
   const navigate = useNavigate();
+
+  let [token, setToken] = useState(Cookies.get("clientToken"));
+  const refreshToken = Cookies.get("clientRefreshToken");
 
   const [clientName, setClientName] = useState("");
   const [clientTitle, setClientTitle] = useState("");
   const [loading, setLoading] = useState(false);
 
-  let token = Cookies.get("clientToken");
-  const refreshToken = Cookies.get("clientRefreshToken");
-  const decodedToken = jwtDecode(refreshToken);
-  const clientId = decodedToken.clientId;
-
   const checkToken = async () => {
-    if (!token || isTokenExpired(token)) {
-      token = await RefreshToken(refreshToken, clientId);
+    if (refreshToken && isTokenExpired(token)) {
+      const newToken = await RefreshToken(refreshToken);
+      Cookies.set("clientToken", newToken.token);
+      setToken(newToken.token);
     }
   };
 
   const fetchClientDetails = async () => {
     await checkToken();
-    if (token && typeof token === "string") {
+    if (token) {
       const response = await fetchDetails.FetchClientDetails(token);
       setClientName(response.clientDetails.username);
       setClientTitle(response.clientDetails.title);
@@ -42,8 +41,7 @@ export default function Homepage() {
     await checkToken();
     e.preventDefault();
     setLoading(true);
-
-    try {
+    if (token) {
       const response = await primaryActions.Logout(token);
       if (response.success) {
         setLoading(false);
@@ -55,9 +53,9 @@ export default function Homepage() {
 
         // Reset clientName state
         navigate("/");
+      } else {
+        setLoading(false);
       }
-    } catch (error) {
-      setLoading(false);
     }
   };
 

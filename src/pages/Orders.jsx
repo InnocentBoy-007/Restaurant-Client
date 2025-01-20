@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
 import services from "../components/services";
-import { jwtDecode } from "jwt-decode";
 import { isTokenExpired } from "../components/isTokenExpired";
 import { RefreshToken } from "../components/RefreshToken";
 
@@ -12,37 +11,42 @@ import { RefreshToken } from "../components/RefreshToken";
 export default function Orders() {
   const navigate = useNavigate();
 
+  const [token, setToken] = useState(Cookies.get("clientToken"));
+  const refreshToken = Cookies.get("clientRefreshToken");
+
   const [trackedOrders, setTrackedOrders] = useState([]);
   const [noOrdersMessage, setNoOrdersMessage] = useState("");
   const [screenLoading, setScreenLoading] = useState("");
 
-  let token = Cookies.get("clientToken");
-  const refreshToken = Cookies.get("clientRefreshToken");
-  const decodedToken = jwtDecode(refreshToken);
-  const clientId = decodedToken.clientId;
-
   const [clientDetails, setClientDetails] = useState({});
 
+  useEffect(() => {
+    if (!Cookies.get("clientToken")) {
+      alert("You need to login first!");
+      navigate("/");
+    }
+  }, []);
+
   const checkToken = async () => {
-    if (!token || isTokenExpired(token)) {
-      token = RefreshToken(refreshToken, clientId);
+    if (refreshToken && isTokenExpired(token)) {
+      const newToken = await RefreshToken(refreshToken);
+      Cookies.set("clientToken", newToken.token);
+      setToken(newToken.token);
     }
   };
 
   const getClientDetails = async () => {
     await checkToken();
-    if (token || typeof token === "string") {
+    if (token) {
       const response = await fetchDetails.FetchClientDetails(token);
       setClientDetails(response.clientDetails);
-    } else {
-      alert("Invalid token!");
     }
   };
 
   const trackOrders = async () => {
     await checkToken();
     setScreenLoading(true);
-    if (token || typeof token === "string") {
+    if (token) {
       const response = await fetchDetails.TrackOrderDetails(token);
       if (response.success) {
         setTrackedOrders(response.orderDetails);
@@ -52,7 +56,6 @@ export default function Orders() {
         setScreenLoading(false);
       }
     } else {
-      alert("Invalid token!");
       setScreenLoading(false);
     }
   };
@@ -68,9 +71,11 @@ export default function Orders() {
     await checkToken();
     e.preventDefault();
 
-    const response = await services.OrderReceivedConfirmation(orderId, token);
-    if (response) {
-      await trackOrders();
+    if (token) {
+      const response = await services.OrderReceivedConfirmation(orderId, token);
+      if (response) {
+        await trackOrders();
+      }
     }
   };
 

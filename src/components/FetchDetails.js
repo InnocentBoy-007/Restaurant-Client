@@ -10,7 +10,7 @@ class FetchDetails {
             const response = await axios.get(URL, { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, withCredentials: true });
             const { clientDetails } = response.data;
 
-            return { clientDetails, success: true };
+            return { clientDetails };
         } catch (error) {
             console.error(error);
             if (error.response) {
@@ -29,7 +29,7 @@ class FetchDetails {
         const URL = `${import.meta.env.VITE_BACKEND_API2}/product/details`;
 
         try {
-            const response = await axios.get(URL, { headers: { "Content-Type": "application/json" } });
+            const response = await axios.get(URL, { headers: { "Content-Type": "application/json" }, withCredentials: true });
             const { products } = response.data;
 
             return { productDetails: products, success: true };

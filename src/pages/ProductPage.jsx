@@ -6,16 +6,13 @@ import productController from "../components/ProductController";
 import cartController from "../components/CartController";
 import { isTokenExpired } from "../components/isTokenExpired";
 import { RefreshToken } from "../components/RefreshToken";
-import { jwtDecode } from "jwt-decode";
 
 // test passed
 const ProductPage = () => {
   const navigate = useNavigate();
 
-  let token = Cookies.get("clientToken");
+  const [token, setToken] = useState(Cookies.get("clientToken"));
   const refreshToken = Cookies.get("clientRefreshToken");
-  const decodedToken = jwtDecode(refreshToken);
-  const clientId = decodedToken.clientId;
 
   const [productInfo, setProductInfo] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -27,8 +24,10 @@ const ProductPage = () => {
   const [addLoading, setAddLoading] = useState(false);
 
   const checkToken = async () => {
-    if (!token || isTokenExpired(token)) {
-      token = await RefreshToken(refreshToken, clientId);
+    if (refreshToken && isTokenExpired(token)) {
+      const newToken = await RefreshToken(refreshToken);
+      Cookies.set("clientToken", newToken.token);
+      setToken(newToken.token);
     }
   };
 
