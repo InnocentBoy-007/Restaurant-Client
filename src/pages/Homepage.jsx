@@ -15,6 +15,7 @@ export default function Homepage() {
   const [clientName, setClientName] = useState("");
   const [clientTitle, setClientTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [logoutFlag, setLogoutFlag] = useState(false);
 
   const checkToken = async () => {
     if (refreshToken && isTokenExpired(token)) {
@@ -75,8 +76,11 @@ export default function Homepage() {
                 )}
               </div>
               <div className="flex gap-2 justify-center">
-                <button className="border border-red-600 p-1" onClick={logOut}>
-                  {loading ? "logging out..." : "log out"}
+                <button
+                  className="border border-red-600 p-1"
+                  onClick={() => setLogoutFlag(true)}
+                >
+                  Log out
                 </button>
                 <button
                   className="border border-red-600 p-1"
@@ -114,6 +118,25 @@ export default function Homepage() {
             </button>
           </div>
         </div>
+        {logoutFlag && (
+          <div className="flex flex-col items-center mt-10">
+            <h1>Are you sure you want to log out?</h1>
+            <div className="flex justify-center gap-10 mt-5">
+              <button
+                className="w-32 bg-green-800 text-white font-semibold py-2 rounded-md hover:bg-green-600 transition duration-200"
+                onClick={logOut}
+              >
+                {loading ? "Loging Out..." : "Yes"}
+              </button>
+              <button
+                className="w-32 bg-red-800 text-white font-semibold py-2 rounded-md hover:bg-red-600 transition duration-200"
+                onClick={() => setLogoutFlag(false)}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        )}
       </>
     </>
   );

@@ -15,6 +15,7 @@ const ProductPage = () => {
   const refreshToken = Cookies.get("clientRefreshToken");
 
   const [productInfo, setProductInfo] = useState([]);
+  const [noProductMessage, setNoProductMessage] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [productQuantity, setProductQuantity] = useState("");
 
@@ -39,6 +40,10 @@ const ProductPage = () => {
     if (response.success) {
       setProductInfo(response.productDetails);
       setScreenLoading(false);
+    } else {
+      setNoProductMessage(response.noProductMessage);
+      setScreenLoading(false);
+      console.log(response.noProductMessage);
     }
   };
 
@@ -48,10 +53,18 @@ const ProductPage = () => {
     e.preventDefault();
 
     try {
-      const response = await cartController.AddProductsToCart(productId, token);
-      if (response.success) {
-        setAddLoading(false);
-        setSelectedProductId("");
+      if (token) {
+        const response = await cartController.AddProductsToCart(
+          productId,
+          token
+        );
+        if (response.success) {
+          setAddLoading(false);
+          setSelectedProductId("");
+        }
+      } else {
+        alert("You need to login first!");
+        navigate("/");
       }
     } catch (error) {
       setAddLoading(false);
@@ -122,7 +135,7 @@ const ProductPage = () => {
                 onClick={() => {
                   if (!token) {
                     alert("You haven't login yet! - warning");
-                    navigate("/user/signIn");
+                    navigate("/");
                     return;
                   }
                   navigate("/user/orders");
@@ -151,80 +164,85 @@ const ProductPage = () => {
             )}
           </div>
 
-          <div className="flex flex-wrap w-[100%] justify-center gap-3">
-            {productInfo.map((item) => (
-              <div
-                key={item._id}
-                className="flex flex-col mt-5 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 text-center items-center p-2 border rounded-lg shadow-lg transition-transform transform hover:scale-105 "
-              >
-                <img
-                  src="https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg"
-                  alt={item.productName}
-                  className="w-4/5 rounded-lg mb-2"
-                  loading="lazy"
-                />
-                <h1 className="text-xl font-semibold">{item.productName}</h1>
-                <p className="text-gray-700">₹{item.productPrice}</p>
-                <p className="text-sm text-gray-500">
-                  Product quantity: {item.productQuantity}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                    onClick={() => {
-                      setSelectedProductId(item._id);
-                      if (!token) {
-                        alert("Please login first to place order");
-                        navigate("/signIn");
-                        setSelectedProductId("");
-                        return;
-                      }
-                      setOrderConfirmationFlag(true);
-                    }}
+          {noProductMessage ? (
+            <div className="flex justify-center items-center mt-40">
+              <h1>{noProductMessage}</h1>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap w-[100%] justify-center gap-3">
+                {productInfo.map((item) => (
+                  <div
+                    key={item._id}
+                    className="flex flex-col mt-5 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 text-center items-center p-2 border rounded-lg shadow-lg transition-transform transform hover:scale-105 "
                   >
-                    Order
-                  </button>
-                  <button
-                    className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                    onClick={(e) => {
-                      addToCart(e, item._id);
-                      if (!token) {
-                        alert("Please login first to add products in cart");
-                        navigate("/signin");
-                        return;
-                      }
-                    }}
-                  >
-                    {addLoading ? "adding..." : "add to cart"}
-                  </button>
-                </div>
+                    <img
+                      src="https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg"
+                      alt={item.productName}
+                      className="w-4/5 rounded-lg mb-2"
+                      loading="lazy"
+                    />
+                    <h1 className="text-xl font-semibold">
+                      {item.productName}
+                    </h1>
+                    <p className="text-gray-700">₹{item.productPrice}</p>
+                    <p className="text-sm text-gray-500">
+                      Product quantity: {item.productQuantity}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                        onClick={() => {
+                          setSelectedProductId(item._id);
+                          if (!token) {
+                            alert("Please login first to place order");
+                            navigate("/");
+                            setSelectedProductId("");
+                            return;
+                          }
+                          setOrderConfirmationFlag(true);
+                        }}
+                      >
+                        Order
+                      </button>
+                      <button
+                        className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                        onClick={(e) => {
+                          addToCart(e, item._id);
+                        }}
+                      >
+                        {addLoading ? "adding..." : "add to cart"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {orderConfirmationFlag && (
+                  <div className="w-full flex justify-center mt-20 gap-2 ">
+                    <form onSubmit={placeOrder}>
+                      <input
+                        placeholder="Please enter the quantity of the product you want to purchase"
+                        className="border border-red-800"
+                        onChange={(e) => setProductQuantity(e.target.value)}
+                        value={productQuantity}
+                      ></input>
+                      <button
+                        className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                        onClick={(e) => placeOrder(e)}
+                      >
+                        {loading ? "Ordering..." : "Order"}
+                      </button>
+                      <button
+                        type="submit"
+                        className="border mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                      >
+                        Close
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
-            ))}
-            {orderConfirmationFlag && (
-              <div className="w-full flex justify-center mt-20 gap-2 ">
-                <form onSubmit={placeOrder}>
-                  <input
-                    placeholder="Please enter the quantity of the product you want to purchase"
-                    className="border border-red-800"
-                    onChange={(e) => setProductQuantity(e.target.value)}
-                    value={productQuantity}
-                  ></input>
-                  <button
-                    className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                    onClick={(e) => placeOrder(e)}
-                  >
-                    {loading ? "Ordering..." : "Order"}
-                  </button>
-                  <button
-                    type="submit"
-                    className="border mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                  >
-                    Close
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </>
       )}
     </>

@@ -4,15 +4,12 @@ import Cookies from "js-cookie";
 import fetchDetails from "../components/FetchDetails";
 import cartController from "../components/CartController";
 import services from "../components/services";
-import { jwtDecode } from "jwt-decode";
 import { isTokenExpired } from "../components/isTokenExpired";
 import { RefreshToken } from "../components/RefreshToken";
 
 export default function Cart() {
-  let token = Cookies.get("clientToken");
+  const [token, setToken] = useState(Cookies.get("clientToken"));
   const refreshToken = Cookies.get("clientRefreshToken");
-  const decodedToken = jwtDecode(refreshToken);
-  const clientId = decodedToken.clientId;
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -27,9 +24,18 @@ export default function Cart() {
 
   const [orderFlag, setOrderFlag] = useState(false);
 
+  useEffect(() => {
+    if (!Cookies.get("clientToken")) {
+      console.log("No token found!");
+      navigate("/");
+    }
+  }, []);
+
   const checkToken = async () => {
-    if (!token || isTokenExpired(token)) {
-      token = await RefreshToken(refreshToken, clientId);
+    if (refreshToken && isTokenExpired(token)) {
+      const newToken = await RefreshToken(refreshToken);
+      Cookies.set("clientToken", newToken.token);
+      setToken(newToken.token);
     }
   };
 

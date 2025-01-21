@@ -36,7 +36,7 @@ class FetchDetails {
         } catch (error) {
             console.error(error);
             if (error.response) {
-                alert(error.response.data.message)
+                return { noProductMessage: error.response.data.message };
             } else if (error.request) {
                 alert("Network error! Please try again later!");
             } else {

@@ -6,15 +6,13 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import secondaryActions from "../../components/secondaryActions";
 import fetchDetails from "../../components/FetchDetails";
+import { isTokenExpired } from "../../components/isTokenExpired";
+import { RefreshToken } from "../../components/RefreshToken";
 
 export default function PersonalDetails() {
   const navigate = useNavigate();
-  const token = Cookies.get("clientToken");
-  //   const refreshToken = Cookies.get("clientRefreshToken"); // add later
-
-  if (!token) {
-    navigate("/");
-  }
+  const [token, setToken] = useState(Cookies.get("clientToken"));
+  const refreshToken = Cookies.get("clientRefreshToken");
 
   const [clientDetails, setClientDetails] = useState({});
   const [initialClientDetails, setInitialClientDetails] = useState({}); // Store initial state
@@ -31,15 +29,29 @@ export default function PersonalDetails() {
   const [editPasswordFlag, setEditPasswordFlag] = useState(false);
   const [otpFlag, setOtpFlag] = useState(false);
 
+  useEffect(() => {
+    if (!Cookies.get("clientToken")) {
+      alert("You have to login first!");
+      navigate("/");
+    }
+  });
+
+  const checkToken = async () => {
+    if (refreshToken && isTokenExpired(token)) {
+      const newToken = await RefreshToken(refreshToken);
+      Cookies.set("clientToken", newToken.token);
+      setToken(newToken.token);
+    }
+  };
+
   const fetchClientDetails = async () => {
     setLoading(true);
+    await checkToken();
     try {
       const response = await fetchDetails.FetchClientDetails(token);
-      if (response.success) {
-        setLoading(false);
-        setClientDetails(response.clientDetails);
-        setInitialClientDetails(response.clientDetails); // Set initial state
-      }
+      setLoading(false);
+      setClientDetails(response.clientDetails);
+      setInitialClientDetails(response.clientDetails); // Set initial state
     } catch (error) {
       setLoading(false);
     }

@@ -16,6 +16,7 @@ export default function Orders() {
 
   const [trackedOrders, setTrackedOrders] = useState([]);
   const [noOrdersMessage, setNoOrdersMessage] = useState("");
+  const [cancelOrderFlag, setCancelOrderFlag] = useState(false);
   const [screenLoading, setScreenLoading] = useState("");
 
   const [clientDetails, setClientDetails] = useState({});
@@ -24,8 +25,13 @@ export default function Orders() {
     if (!Cookies.get("clientToken")) {
       alert("You need to login first!");
       navigate("/");
+    } else {
+      getClientDetails();
+      trackOrders();
+      getClientDetails();
+      trackOrders();
     }
-  }, []);
+  }, [token]);
 
   const checkToken = async () => {
     if (refreshToken && isTokenExpired(token)) {
@@ -60,22 +66,27 @@ export default function Orders() {
     }
   };
 
-  useEffect(() => {
-    getClientDetails();
-    trackOrders();
-    getClientDetails();
-    trackOrders();
-  }, [token]);
-
   const orderReceivedConfirmation = async (e, orderId) => {
-    await checkToken();
     e.preventDefault();
+    setScreenLoading(true);
+    await checkToken();
 
     if (token) {
-      const response = await services.OrderReceivedConfirmation(orderId, token);
-      if (response) {
-        await trackOrders();
-      }
+      await services.OrderReceivedConfirmation(orderId, token);
+      setScreenLoading(false);
+      await trackOrders();
+    }
+  };
+
+  const cancelOrder = async (e, orderId) => {
+    e.preventDefault;
+    setScreenLoading(true);
+    await checkToken();
+
+    if (token) {
+      await services.CancelOrder(orderId, token);
+      await trackOrders();
+      setScreenLoading(false);
     }
   };
 
@@ -142,7 +153,7 @@ export default function Orders() {
                       <td>{item.orderTime}</td>
                       <td>{item.status}</td>
                       <td>{item.receivedByClient ? "Yes" : "No"}</td>
-                      {item.status == "accepted" && (
+                      {item.status == "accepted" ? (
                         <>
                           {!item.receivedByClient && (
                             <>
@@ -153,6 +164,34 @@ export default function Orders() {
                                 }
                               >
                                 Received
+                              </button>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {cancelOrderFlag ? (
+                            <div className="flex justify-center gap-2">
+                              <button
+                                className="w-32 bg-red-800 text-white font-semibold py-2 rounded-md hover:bg-red-600 transition duration-200"
+                                onClick={(e) => cancelOrder(e, item._id)}
+                              >
+                                Yes
+                              </button>
+                              <button
+                                className="w-32 bg-green-800 text-white font-semibold py-2 rounded-md hover:bg-green-600 transition duration-200"
+                                onClick={() => setCancelOrderFlag(false)}
+                              >
+                                No
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                className="p-1 border border-red-600"
+                                onClick={() => setCancelOrderFlag(true)}
+                              >
+                                Cancel Order
                               </button>
                             </>
                           )}
