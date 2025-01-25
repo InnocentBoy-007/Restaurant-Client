@@ -7,6 +7,9 @@ import services from "../components/services";
 import { isTokenExpired } from "../components/isTokenExpired";
 import { RefreshToken } from "../components/RefreshToken";
 
+
+// there is an error in the product quantity (it does not shows the exact product quantity inside the product database)
+
 export default function Cart() {
   const [token, setToken] = useState(Cookies.get("clientToken"));
   const refreshToken = Cookies.get("clientRefreshToken");
