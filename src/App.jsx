@@ -7,7 +7,7 @@ import ProductPage from "./pages/ProductPage";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import BackupJWT from "./pages/BackupJWT";
-import ForgotPassword from "./pages/passwordManagement/forgotPassword";
+import ForgotPassword from "./pages/passwordManagement/ForgotPassword"
 import Profile from "./pages/profile/Profile";
 
 /**

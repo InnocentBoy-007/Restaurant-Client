@@ -1,9 +1,9 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
+import Cookies from 'js-cookie'
 import fetchDetails from "../components/FetchDetails";
-import services from "../components/services";
+import services from "../components/Services";
 import { isTokenExpired } from "../components/isTokenExpired";
 import { RefreshToken } from "../components/RefreshToken";
 
