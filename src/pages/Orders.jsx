@@ -86,6 +86,7 @@ export default function Orders() {
     if (token) {
       await services.CancelOrder(orderId, token);
       await trackOrders();
+      setCancelOrderFlag(false);
       setScreenLoading(false);
     }
   };
